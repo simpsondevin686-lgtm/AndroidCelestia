@@ -931,10 +931,10 @@ public class AppCore {
     private static native void c_setStarExposure(long pointer, float starExposure);
     private static native float c_getStarExposure(long pointer);
 
-    public void setToneMapping(boolean toneMapping) { c_setToneMapping(pointer, toneMapping); }
-    public boolean getToneMapping() { return c_getToneMapping(pointer); }
-    private static native void c_setToneMapping(long pointer, boolean toneMapping);
-    private static native boolean c_getToneMapping(long pointer);
+    public void setToneMapping(int toneMapping) { c_setToneMapping(pointer, toneMapping); }
+    public int getToneMapping() { return c_getToneMapping(pointer); }
+    private static native void c_setToneMapping(long pointer, int toneMapping);
+    private static native int c_getToneMapping(long pointer);
 
     public void setExposure(double exposure) { c_setExposure(pointer, (float)exposure); }
     public double getExposure() { return c_getExposure(pointer); }

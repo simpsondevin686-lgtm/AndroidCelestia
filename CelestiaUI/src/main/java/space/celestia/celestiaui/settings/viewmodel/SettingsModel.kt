@@ -351,7 +351,6 @@ enum class SettingsKey : PreferenceManager.Key {
                 ShowEcliptic,
                 ShowAutoMag,
                 ShowSmoothLines,
-                ToneMapping,
                 ShowDiagrams,
                 ShowConstellationLabels,
                 ShowLatinConstellationLabels,
@@ -450,6 +449,7 @@ enum class SettingsKey : PreferenceManager.Key {
                 TemperatureScale,
                 ScriptSystemAccessPolicy,
                 StarColors,
+                ToneMapping,
             )
 
         val allDoubleCases: List<SettingsKey>

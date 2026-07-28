@@ -1213,27 +1213,27 @@ Java_space_celestia_celestia_AppCore_c_1getStarExposure(JNIEnv *env, jclass claz
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_space_celestia_celestia_AppCore_c_1setToneMapping(JNIEnv *env, jclass clazz, jlong pointer, jboolean value) {
+Java_space_celestia_celestia_AppCore_c_1setToneMapping(JNIEnv *env, jclass clazz, jlong pointer, jint value) {
     auto core = reinterpret_cast<CelestiaCore *>(pointer);
-    core->getRenderer()->setToneMapping(value);
+    core->getRenderer()->setToneMappingMode(static_cast<ToneMappingMode>(value));
 }
 
-extern "C" JNIEXPORT jboolean JNICALL
+extern "C" JNIEXPORT jint JNICALL
 Java_space_celestia_celestia_AppCore_c_1getToneMapping(JNIEnv *env, jclass clazz, jlong pointer) {
     auto core = reinterpret_cast<CelestiaCore *>(pointer);
-    return core->getRenderer()->getToneMapping();
+    return static_cast<jint>(core->getRenderer()->getToneMappingMode());
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_space_celestia_celestia_AppCore_c_1setExposure(JNIEnv *env, jclass clazz, jlong pointer, jfloat value) {
     auto core = reinterpret_cast<CelestiaCore *>(pointer);
-    core->getRenderer()->setExposure(value);
+    core->getRenderer()->setToneMappingExposure(value);
 }
 
 extern "C" JNIEXPORT jfloat JNICALL
 Java_space_celestia_celestia_AppCore_c_1getExposure(JNIEnv *env, jclass clazz, jlong pointer) {
     auto core = reinterpret_cast<CelestiaCore *>(pointer);
-    return core->getRenderer()->getExposure();
+    return core->getRenderer()->getToneMappingExposure();
 }
 
 extern "C" JNIEXPORT void JNICALL

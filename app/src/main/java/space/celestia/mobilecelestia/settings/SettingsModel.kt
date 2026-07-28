@@ -320,7 +320,10 @@ private val staticRendererItems: List<SettingsItem> = listOf(
             header = CelestiaString("Output Rendering", ""),
             rows = listOf(
                 SettingsPreferenceSwitchItem(PreferenceManager.PredefinedKey.SRGBRendering, CelestiaString("sRGB Rendering (Experimental)", "")),
-                SettingsSwitchItem(SettingsKey.ToneMapping, SettingsSwitchItem.Representation.Switch),
+                SettingsSelectionSingleItem(key = SettingsKey.ToneMapping, options = listOf(
+                    Pair(0, CelestiaString("Off", "Tone mapping mode")),
+                    Pair(1, CelestiaString("Manual", "Tone mapping mode")),
+                ), displayName = SettingsKey.ToneMapping.displayName, defaultSelection = 0),
                 SettingsSliderItem(SettingsKey.Exposure, 0.01, 100.0, isLogarithmic = true),
             ),
             footer = Footer.Text(CelestiaString("Tone mapping and exposure only affect sRGB rendering. Changes to sRGB rendering take effect after a restart.", "Output rendering settings footnote"))

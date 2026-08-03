@@ -218,6 +218,8 @@ list(APPEND CELESTIA_SOURCES
         ${CELESTIA_SRC_DIR}/celephem/spiceorbit.h
         ${CELESTIA_SRC_DIR}/celephem/spicerotation.cpp
         ${CELESTIA_SRC_DIR}/celephem/spicerotation.h
+        ${CELESTIA_SRC_DIR}/celephem/tass17.cpp
+        ${CELESTIA_SRC_DIR}/celephem/tass17.h
         )
 
 list(APPEND CELESTIA_SOURCES

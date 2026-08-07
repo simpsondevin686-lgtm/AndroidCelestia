@@ -33,7 +33,9 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import space.celestia.celestia.AppCore
+import space.celestia.celestia.EclipseFinder
 import space.celestia.celestiaui.R
+import space.celestia.celestiaui.compose.CheckboxRow
 import space.celestia.celestiaui.compose.DateInputDialog
 import space.celestia.celestiaui.compose.OptionInputDialog
 import space.celestia.celestiaui.compose.Separator
@@ -53,12 +55,15 @@ private sealed class EventFinderInputAlert {
 }
 
 @Composable
-fun EventFinderInputScreen(paddingValues: PaddingValues, handler: (objectName: String, startDate: Date, endDate: Date) -> Unit) {
+fun EventFinderInputScreen(paddingValues: PaddingValues, handler: (objectName: String, startDate: Date, endDate: Date, kind: Int) -> Unit) {
     val defaultSearchingInterval: Long = 365L * 24 * 60 * 60 * 1000
-    var startTime by rememberSaveable { mutableStateOf(Date(Date().time - defaultSearchingInterval)) }
-    var endTime by rememberSaveable { mutableStateOf(Date()) }
+    val defaultReferenceTime = remember { Date() }
+    var startTime by rememberSaveable { mutableStateOf(Date(defaultReferenceTime.time - defaultSearchingInterval)) }
+    var endTime by rememberSaveable { mutableStateOf(Date(defaultReferenceTime.time + defaultSearchingInterval)) }
     var objectName by rememberSaveable { mutableStateOf(AppCore.getLocalizedStringDomain("Earth", "celestia-data")) }
     var objectPath by rememberSaveable { mutableStateOf("Sol/Earth") }
+    var findSolar by rememberSaveable { mutableStateOf(true) }
+    var findLunar by rememberSaveable { mutableStateOf(true) }
     val formatter by remember { mutableStateOf(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault())) }
 
     var alert by remember { mutableStateOf<EventFinderInputAlert?>(null) }
@@ -99,15 +104,20 @@ fun EventFinderInputScreen(paddingValues: PaddingValues, handler: (objectName: S
             TextRow(primaryText = CelestiaString("Object", "In eclipse finder, object to find eclipse with, or in go to"), secondaryText = objectName, modifier = Modifier.clickable(onClick = dropUnlessResumed {
                 alert = EventFinderInputAlert.ObjectSelection
             }))
+            CheckboxRow(primaryText = CelestiaString("Solar", "Solar eclipses."), checked = findSolar, onCheckedChange = { findSolar = it })
+            CheckboxRow(primaryText = CelestiaString("Lunar", "Lunar eclipses."), checked = findLunar, onCheckedChange = { findLunar = it })
         }
 
         item {
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.list_spacing_short)))
-            FilledTonalButton(modifier = Modifier.fillMaxWidth().padding(
+            FilledTonalButton(enabled = findSolar || findLunar, modifier = Modifier.fillMaxWidth().padding(
                 horizontal = dimensionResource(id = R.dimen.list_item_medium_margin_horizontal),
                 vertical = dimensionResource(id = R.dimen.common_page_medium_gap_vertical),
             ), onClick = dropUnlessResumed {
-                handler(objectPath, startTime, endTime)
+                var kind = 0
+                if (findSolar) kind = kind or EclipseFinder.ECLIPSE_KIND_SOLAR
+                if (findLunar) kind = kind or EclipseFinder.ECLIPSE_KIND_LUNAR
+                handler(objectPath, startTime, endTime, kind)
             }) {
                 Text(text = CelestiaString("Find", "Find (eclipses)"))
             }

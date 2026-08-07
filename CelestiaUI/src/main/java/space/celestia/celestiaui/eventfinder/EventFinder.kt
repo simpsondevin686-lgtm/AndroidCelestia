@@ -106,7 +106,7 @@ fun EventFinder() {
             entryProvider = { route ->
                 when (route) {
                     is Page.Home -> NavEntry(route) {
-                        EventFinderInputScreen(paddingValues) { objectName, startDate, endDate ->
+                        EventFinderInputScreen(paddingValues) { objectName, startDate, endDate, kind ->
                             scope.launch {
                                 val body = withContext(viewModel.executor.asCoroutineDispatcher()) {
                                     viewModel.appCore.simulation.findObject(objectName).`object` as? Body
@@ -121,7 +121,7 @@ fun EventFinder() {
                                     finder.search(
                                         startDate.julianDay,
                                         endDate.julianDay,
-                                        EclipseFinder.ECLIPSE_KIND_LUNAR or EclipseFinder.ECLIPSE_KIND_SOLAR
+                                        kind
                                     )
                                 }
                                 finder.close()

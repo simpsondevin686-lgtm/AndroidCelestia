@@ -8,9 +8,35 @@
 // of the License, or (at your option) any later version.
 
 #include "CelestiaSelection.h"
+#include <celengine/body.h>
 #include <celengine/simulation.h>
 #include <celengine/selection.h>
 #include <celmath/geomutil.h>
+#include <celmath/intersect.h>
+#include <celmath/sphere.h>
+
+namespace
+{
+
+Eigen::Vector3d findMaxEclipsePoint(const Eigen::Vector3d& toOcculter,
+                                    const Eigen::Vector3d& toReceiver,
+                                    double receiverRadius)
+{
+    double distance = 0.0;
+    if (celestia::math::testIntersection(
+            Eigen::ParametrizedLine<double, 3>(Eigen::Vector3d::Zero(), toOcculter),
+            celestia::math::Sphered(toReceiver, receiverRadius),
+            distance))
+    {
+        return toOcculter * distance - toReceiver;
+    }
+
+    const double t = toReceiver.dot(toOcculter) / toOcculter.squaredNorm();
+    Eigen::Vector3d point = t * toOcculter - toReceiver;
+    return point * (receiverRadius / point.norm());
+}
+
+}
 
 extern "C"
 JNIEXPORT jobject JNICALL
@@ -94,18 +120,60 @@ Java_space_celestia_celestia_Simulation_c_1setTime(JNIEnv *env, jclass clazz, jl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_space_celestia_celestia_Simulation_c_1goToEclipse(JNIEnv *env, jclass clazz, jlong pointer, jdouble time, jobject ref, jobject target) {
-    using namespace celestia::math;
-    auto refSel = javaSelectionAsSelection(env, ref);
-    auto targetSel = javaSelectionAsSelection(env, target);
+Java_space_celestia_celestia_Simulation_c_1performEclipseAction(
+        JNIEnv *env, jclass clazz, jlong pointer, jdouble startTime, jdouble endTime,
+        jlong occulterPointer, jlong receiverPointer, jint action) {
     auto sim = reinterpret_cast<Simulation *>(pointer);
-    sim->setTime(time);
-    sim->setFrame(ObserverFrame::CoordinateSystem::PhaseLock, targetSel, refSel);
-    sim->update(0);
-    double distance = targetSel.radius() * 4.0;
-    sim->gotoLocation(UniversalCoord::Zero().offsetKm(Eigen::Vector3d::UnitX() * distance),
-                      YRotation(-0.5 * celestia::numbers::pi) * XRotation(-0.5 * celestia::numbers::pi),
-                      2.5);
+    auto occulter = reinterpret_cast<Body *>(occulterPointer);
+    auto receiver = reinterpret_cast<Body *>(receiverPointer);
+    auto sun = receiver->getSystem()->getStar();
+    if (sun == nullptr)
+        return;
+
+    const double midEclipseTime = (startTime + endTime) / 2.0;
+    if (action == 0) {
+        sim->setTime(midEclipseTime);
+        return;
+    }
+
+    double now = sim->getTime();
+    if (now < startTime || now > endTime)
+        sim->setTime(midEclipseTime);
+    now = sim->getTime();
+
+    const Eigen::Vector3d toOcculter = occulter->getPosition(now).offsetFromKm(sun->getPosition(now));
+    const Eigen::Vector3d toReceiver = receiver->getPosition(now).offsetFromKm(sun->getPosition(now));
+    const Eigen::Vector3d receiverUp = receiver->getEclipticToBodyFixed(now).conjugate() * Eigen::Vector3d::UnitY();
+
+    Body *frameBody = receiver;
+    Eigen::Vector3d position;
+    Eigen::Quaterniond orientation;
+
+    switch (action) {
+    case 1: {
+        const Eigen::Vector3d eclipsePoint = findMaxEclipsePoint(toOcculter, toReceiver, receiver->getRadius());
+        position = eclipsePoint * 4.0;
+        orientation = celestia::math::LookAt<double>(position, eclipsePoint, receiverUp);
+        break;
+    }
+    case 2: {
+        const Eigen::Vector3d eclipsePoint = findMaxEclipsePoint(toOcculter, toReceiver, receiver->getRadius());
+        position = eclipsePoint * 1.0001;
+        orientation = celestia::math::LookAt<double>(eclipsePoint, -toReceiver, eclipsePoint.normalized());
+        break;
+    }
+    case 3:
+    case 4:
+        frameBody = occulter;
+        position = toOcculter.normalized() * occulter->getRadius() * (action == 3 ? 1.0001 : 20.0);
+        orientation = celestia::math::LookAt<double>(position, toReceiver, receiverUp);
+        break;
+    default:
+        return;
+    }
+
+    sim->setFrame(ObserverFrame::CoordinateSystem::Ecliptical, frameBody);
+    sim->gotoLocation(UniversalCoord::Zero().offsetKm(position), orientation, 5.0);
 }
 
 extern "C"

@@ -14,6 +14,12 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 public class Simulation {
+    public static final int ECLIPSE_ACTION_SET_TIME = 0;
+    public static final int ECLIPSE_ACTION_NEAR_ECLIPSED_BODY = 1;
+    public static final int ECLIPSE_ACTION_FROM_ECLIPSED_BODY_SURFACE = 2;
+    public static final int ECLIPSE_ACTION_FROM_OCCULTER_SURFACE = 3;
+    public static final int ECLIPSE_ACTION_BEHIND_OCCULTER = 4;
+
     final private long pointer;
     private Universe universe;
 
@@ -52,16 +58,9 @@ public class Simulation {
     public double getTime() { return c_getTime(pointer); }
     public void setTime(double time) { c_setTime(pointer, time); }
 
-    public void goToEclipse(EclipseFinder.Eclipse eclipse) {
-        PlanetarySystem system = eclipse.receiver.getSystem();
-        if (system == null)
-             return;
-        Star star = system.getStar();
-        if (star == null)
-            return;
-        Selection target = new Selection(eclipse.receiver);
-        Selection ref = new Selection(star);
-        c_goToEclipse(pointer, eclipse.startTimeJulian, ref, target);
+    public void performEclipseAction(EclipseFinder.Eclipse eclipse, int action) {
+        c_performEclipseAction(pointer, eclipse.startTimeJulian, eclipse.endTimeJulian,
+                eclipse.occulter.pointer, eclipse.receiver.pointer, action);
     }
 
     public @NonNull
@@ -94,7 +93,8 @@ public class Simulation {
     private static native void c_reverseObserverOrientation(long pointer);
     private static native double c_getTime(long pointer);
     private static native void c_setTime(long pointer, double time);
-    private static native void c_goToEclipse(long pointer, double time, Selection ref, Selection target);
+    private static native void c_performEclipseAction(long pointer, double startTime, double endTime,
+                                                      long occulter, long receiver, int action);
     private static native long c_getActiveObserver(long pointer);
     private static native void c_goToDestination(long ptr, String target, double distance);
     private static native void c_goToLocation(long pointer, Selection selection, double distance, double duration);

@@ -135,9 +135,9 @@ fun EventFinder() {
                         }
                     }
                     is Page.Results -> NavEntry(route) {
-                        EventFinderResultsScreen(results = route.results, paddingValues = paddingValues) { eclipse ->
+                        EventFinderResultsScreen(results = route.results, paddingValues = paddingValues) { eclipse, action ->
                             scope.launch(viewModel.executor.asCoroutineDispatcher()) {
-                                viewModel.appCore.simulation.goToEclipse(eclipse)
+                                viewModel.appCore.simulation.performEclipseAction(eclipse, action)
                             }
                         }
                     }

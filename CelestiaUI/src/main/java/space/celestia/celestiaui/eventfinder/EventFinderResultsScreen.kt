@@ -18,10 +18,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -30,8 +33,10 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import space.celestia.celestia.EclipseFinder
+import space.celestia.celestia.Simulation
 import space.celestia.celestia.Utils
 import space.celestia.celestiaui.R
+import space.celestia.celestiaui.compose.ContextMenuContainer
 import space.celestia.celestiaui.compose.EmptyHint
 import space.celestia.celestiaui.compose.TextRow
 import space.celestia.celestiaui.utils.CelestiaString
@@ -39,7 +44,7 @@ import java.text.DateFormat
 import java.util.Locale
 
 @Composable
-fun EventFinderResultsScreen(results: List<EclipseFinder.Eclipse>, paddingValues: PaddingValues, handler: (eclipse: EclipseFinder.Eclipse) -> Unit) {
+fun EventFinderResultsScreen(results: List<EclipseFinder.Eclipse>, paddingValues: PaddingValues, handler: (eclipse: EclipseFinder.Eclipse, action: Int) -> Unit) {
     val formatter by remember { mutableStateOf(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault())) }
     if (results.isEmpty()) {
         Box(modifier = Modifier
@@ -60,9 +65,29 @@ fun EventFinderResultsScreen(results: List<EclipseFinder.Eclipse>, paddingValues
             modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection())
         ) {
             items(results) { eclipse ->
-                TextRow(primaryText = "${eclipse.occulter.name} -> ${eclipse.receiver.name}", secondaryText = formatter.format(Utils.createDateFromJulianDay(eclipse.startTimeJulian)), modifier = Modifier.clickable(onClick = dropUnlessResumed {
-                    handler(eclipse)
-                }))
+                var expanded by remember(eclipse) { mutableStateOf(false) }
+                ContextMenuContainer(expanded = expanded, onDismissRequest = { expanded = false }, menu = {
+                    val actions = listOf(
+                        CelestiaString("Set time to mid-eclipse", "") to Simulation.ECLIPSE_ACTION_SET_TIME,
+                        CelestiaString("Near %s", "").format(eclipse.receiver.name) to Simulation.ECLIPSE_ACTION_NEAR_ECLIPSED_BODY,
+                        CelestiaString("From surface of %s", "").format(eclipse.receiver.name) to Simulation.ECLIPSE_ACTION_FROM_ECLIPSED_BODY_SURFACE,
+                        CelestiaString("From surface of %s", "").format(eclipse.occulter.name) to Simulation.ECLIPSE_ACTION_FROM_OCCULTER_SURFACE,
+                        CelestiaString("Behind %s", "").format(eclipse.occulter.name) to Simulation.ECLIPSE_ACTION_BEHIND_OCCULTER,
+                    )
+                    actions.forEach { (title, action) ->
+                        DropdownMenuItem(text = { Text(title) }, onClick = {
+                            expanded = false
+                            handler(eclipse, action)
+                        })
+                    }
+                }) {
+                    TextRow(primaryText = listOf(
+                        CelestiaString("Occulter: %s", "Eclipse finder result").format(eclipse.occulter.name),
+                        CelestiaString("Eclipsed body: %s", "Eclipse finder result").format(eclipse.receiver.name),
+                    ).joinToString("\n"), secondaryText = formatter.format(Utils.createDateFromJulianDay(eclipse.startTimeJulian)), modifier = Modifier.clickable(onClick = dropUnlessResumed {
+                        expanded = true
+                    }))
+                }
             }
         }
     }

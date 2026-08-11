@@ -9,7 +9,6 @@
 
 package space.celestia.mobilecelestia
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Intent
@@ -33,7 +32,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -65,13 +63,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.animation.addListener
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.graphics.Insets
 import androidx.core.net.toUri
-import androidx.core.os.BundleCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuCompat
@@ -79,7 +74,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.drawerlayout.widget.DrawerLayout.DrawerListener
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -247,8 +241,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
         fun getAppStatusReporter(): AppStatusReporter
     }
 
-    private var interactionBlocked = false
-
     private var readyForInteraction = false
 
     private var urlToOpen: AppURL? = null
@@ -268,9 +260,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
     private var isAskingForExit = false
 
     private var onBackPressedCallback: OnBackPressedCallback? = null
-
-    private var currentToolbarActions: List<BottomControlAction> = listOf()
-    private var currentToolbarOverflowActions: List<OverflowItem> = listOf()
 
     private lateinit var mediaRouter: MediaRouter
     private var activePresentation: CelestiaPresentation? = null
@@ -337,55 +326,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
         appStatusReporter.register(this)
 
         val mainContentView = findViewById<ComposeView>(R.id.main_content)
-        val legacyContainer = findViewById<FrameLayout>(R.id.main_container)
-
-        if (featureFlags.composeSurfaceV4) {
-            legacyContainer.isVisible = false
-            mainContentView.isVisible = true
-
-            mainContentView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            mainContentView.setContent {
-                Mdc3Theme {
-                    MainContent()
-                }
-            }
-        } else {
-            mainContentView.isVisible = false
-            legacyContainer.isVisible = true
-
-            val celestiaComposeView = findViewById<ComposeView>(R.id.celestia_compose_container)
-            celestiaComposeView.isVisible = true
-            celestiaComposeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            celestiaComposeView.setContent {
-                Mdc3Theme {
-                    RenderContent(safeAreaInsets = rememberSafeAreaInsets())
-                }
-            }
-
-            findViewById<ComposeView>(R.id.loading_fragment_container).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-                setContent {
-                    Mdc3Theme {
-                        LoadingScreen(safeAreaInsets = rememberSafeAreaInsets())
-                    }
-                }
-            }
-
-            findViewById<ComposeView>(R.id.bottom_sheet_host).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-                setContent {
-                    Mdc3Theme {
-                        SheetLayout(
-                            safeAreaInsets = rememberSafeAreaInsets(),
-                            visible = viewModel.bottomSheetVisible.value,
-                            onDismiss = {
-                                viewModel.bottomSheetVisible.value = false
-                            }
-                        ) {
-                            ToolScreenContent()
-                        }
-                    }
-                }
+        mainContentView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+        mainContentView.setContent {
+            Mdc3Theme {
+                MainContent()
             }
         }
 
@@ -408,11 +352,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
             return@setOnApplyWindowInsetsListener insets
         }
 
-        @Suppress("ClickableViewAccessibility")
-        findViewById<View>(R.id.interaction_filter).setOnTouchListener { _, _ ->
-            return@setOnTouchListener interactionBlocked
-        }
-
         val weakSelf = WeakReference(this)
         drawerLayout.setDrawerLockMode(if (drawerLayout.isDrawerOpen(GravityCompat.END)) DrawerLayout.LOCK_MODE_UNLOCKED else DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         drawerLayout.addDrawerListener(object: DrawerListener {
@@ -429,16 +368,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
             override fun onDrawerStateChanged(newState: Int) {}
         })
 
-        val bottomSheetContainer = findViewById<View>(R.id.bottom_sheet_insets)
-        ViewCompat.setOnApplyWindowInsetsListener(bottomSheetContainer) { _, insets ->
-            val systemBarInsets = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars())
-            WindowInsetsCompat.Builder(insets)
-                .setInsets(WindowInsetsCompat.Type.systemBars(), Insets.of(0, 0, 0, systemBarInsets.bottom))
-                .build()
-        }
-        bottomSheetContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        findViewById<View>(R.id.toolbar_overlay).systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-
         if (currentState == AppStatusReporter.State.LOADING_FAILURE || currentState == AppStatusReporter.State.EXTERNAL_LOADING_FAILURE) {
             celestiaLoadingFailed()
             return
@@ -446,20 +375,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
 
         if (savedState != null) {
             initialURLCheckPerformed = savedState.getBoolean(ARG_INITIAL_URL_CHECK_PERFORMED, false)
-
-            if (!featureFlags.composeSurfaceV4) {
-                val toolbarVisible = savedState.getBoolean(TOOLBAR_VISIBLE_TAG, false)
-                @Suppress("UNCHECKED_CAST")
-                currentToolbarActions = BundleCompat.getSerializable(savedState, TOOLBAR_ACTIONS_TAG, ArrayList::class.java) as? List<BottomControlAction> ?: listOf()
-                @Suppress("UNCHECKED_CAST")
-                currentToolbarOverflowActions = BundleCompat.getSerializable(savedState, TOOLBAR_OVERFLOW_ACTIONS_TAG, ArrayList::class.java) as? List<OverflowItem> ?: listOf()
-
-                findViewById<View>(R.id.bottom_toolbar_container).visibility = if (toolbarVisible) View.VISIBLE else View.GONE
-
-                if (currentToolbarActions.isNotEmpty() && toolbarVisible) {
-                    showToolbarActionsDirect(currentToolbarActions, currentToolbarOverflowActions)
-                }
-            }
         }
 
         when (currentState) {
@@ -487,11 +402,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (!featureFlags.composeSurfaceV4) {
-            outState.putBoolean(TOOLBAR_VISIBLE_TAG, findViewById<View>(R.id.bottom_toolbar_container).isVisible)
-            outState.putSerializable(TOOLBAR_ACTIONS_TAG, ArrayList<BottomControlAction>(currentToolbarActions))
-            outState.putSerializable(TOOLBAR_OVERFLOW_ACTIONS_TAG, ArrayList<OverflowItem>(currentToolbarOverflowActions))
-        }
         outState.putBoolean(ARG_INITIAL_URL_CHECK_PERFORMED, initialURLCheckPerformed)
         super.onSaveInstanceState(outState)
     }
@@ -749,7 +659,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
     }
 
     private fun celestiaLoadingFinished() {
-        findViewById<View>(R.id.loading_fragment_container).visibility = View.GONE
         viewModel.loadingVisible.value = false
         showCelestiaPlus.value = purchaseManager.canUseInAppPurchase()
         findViewById<View>(R.id.drawer_content).visibility = View.VISIBLE
@@ -1406,13 +1315,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
             showUnsupportedAction()
     }
 
-    private fun onBottomControlHide() {
-        lifecycleScope.launch {
-            hideToolbar(true)
-        }
-    }
-
-
     private fun shareFavoriteItem(item: MutableFavoriteBaseItem) {
         if (item is FavoriteBookmarkItem && item.bookmark.isLeaf) {
             shareURLDirect(item.bookmark.name, item.bookmark.url)
@@ -1629,7 +1531,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
 
     private suspend fun hideOverlay(animated: Boolean) {
         hideMenu(animated)
-        hideBottomSheet(animated)
+        hideBottomSheet()
     }
 
     private suspend fun hideMenu(animated: Boolean): Unit = suspendCancellableCoroutine { cont ->
@@ -1657,101 +1559,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
         drawerLayout.closeDrawer(GravityCompat.END, animated)
     }
 
-    private suspend fun hideToolbar(animated: Boolean) {
-        if (featureFlags.composeSurfaceV4) {
-            viewModel.toolbarVisible.value = false
-            return
-        }
-        hideViewAlpha(animated, R.id.bottom_toolbar_container)
-        currentToolbarActions = listOf()
+    private fun hideToolbar() {
+        viewModel.toolbarVisible.value = false
     }
 
-    private suspend fun hideBottomSheet(animated: Boolean = true) {
+    private fun hideBottomSheet() {
         viewModel.bottomSheetVisible.value = false
-    }
-
-    private suspend fun showView(animated: Boolean, viewID: Int, horizontal: Boolean) {
-        val view = findViewById<View>(viewID)
-        view.visibility = View.VISIBLE
-        val parent = view.parent as? View ?: return
-
-        val destination: Float = if (horizontal) {
-            val ltr = resources.configuration.layoutDirection != View.LAYOUT_DIRECTION_RTL
-            (if (ltr) (parent.width - view.left) else -(view.right)).toFloat()
-        } else {
-            (parent.height - view.top).toFloat()
-        }
-        showView(animated, ObjectAnimator.ofFloat(view, if (horizontal) "translationX" else "translationY", destination, 0f))
-    }
-
-    private suspend fun showViewAlpha(animated: Boolean, viewID: Int) {
-        val view = findViewById<View>(viewID)
-        view.visibility = View.VISIBLE
-        view.alpha = 0.0f
-
-        showView(animated, ObjectAnimator.ofFloat(view, "alpha", 1.0f))
-    }
-
-    private suspend fun showView(animated: Boolean, showAnimator: ObjectAnimator): Unit = suspendCancellableCoroutine { cont ->
-        val executionBlock = {
-            cont.resume(Unit)
-        }
-        if (!animated) {
-            executionBlock()
-        } else {
-            showAnimator.duration = 200
-            showAnimator.addListener(onStart = {
-                interactionBlocked = true
-            }, onEnd = {
-                interactionBlocked = false
-                executionBlock()
-            }, onCancel = {
-                interactionBlocked = false
-                executionBlock()
-            })
-            showAnimator.start()
-        }
-    }
-
-    private suspend fun hideView(animated: Boolean, viewID: Int, horizontal: Boolean) {
-        val view = findViewById<View>(viewID)
-        val parent = view.parent as? View ?: return
-
-        val destination: Float = if (horizontal) {
-            val ltr = resources.configuration.layoutDirection != View.LAYOUT_DIRECTION_RTL
-            (if (ltr) (parent.width - view.left) else -(view.right)).toFloat()
-        } else {
-            (parent.height - view.top).toFloat()
-        }
-        hideView(animated, view, ObjectAnimator.ofFloat(view, if (horizontal) "translationX" else "translationY", 0f, destination))
-    }
-
-    private suspend fun hideViewAlpha(animated: Boolean, viewID: Int) {
-        val view = findViewById<View>(viewID)
-        hideView(animated, view, ObjectAnimator.ofFloat(view, "alpha", 0.0f))
-    }
-
-    private suspend fun hideView(animated: Boolean, view: View, hideAnimator: ObjectAnimator): Unit = suspendCancellableCoroutine { cont ->
-        val executionBlock = {
-            view.visibility = View.INVISIBLE
-            cont.resume(Unit)
-        }
-
-        if (view.visibility != View.VISIBLE || !animated) {
-            executionBlock()
-        } else {
-            hideAnimator.duration = 200
-            hideAnimator.addListener(onStart = {
-                interactionBlocked = true
-            }, onEnd = {
-                interactionBlocked = false
-                executionBlock()
-            }, onCancel = {
-                interactionBlocked = false
-                executionBlock()
-            })
-            hideAnimator.start()
-        }
     }
 
     private fun showInfo(selection: Selection) = lifecycleScope.launch {
@@ -2211,20 +2024,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
 
     private suspend fun showToolbarActions(actions: List<BottomControlAction>, overflowItems: List<OverflowItem> = listOf()) {
         hideOverlay(true)
-        if (featureFlags.composeSurfaceV4) {
-            viewModel.toolbarOverflowActions.value = overflowItems
-            viewModel.toolbarActions.value = actions
-            viewModel.toolbarVisible.value = true
-            return
-        }
-        hideToolbar(true)
-        showToolbarActionsDirect(actions, overflowItems)
-        showViewAlpha(true, R.id.bottom_toolbar_container)
-    }
-
-    private fun showToolbarActionsDirect(actions: List<BottomControlAction>, overflowItems: List<OverflowItem>) {
-        currentToolbarActions = actions
-        populateToolbarContent(findViewById(R.id.bottom_toolbar_content), actions, overflowItems)
+        viewModel.toolbarOverflowActions.value = overflowItems
+        viewModel.toolbarActions.value = actions
+        viewModel.toolbarVisible.value = true
     }
 
     private fun populateToolbarContent(contentView: LinearLayout, actions: List<BottomControlAction>, overflowItems: List<OverflowItem>) {
@@ -2282,7 +2084,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
             popup.setOnMenuItemClickListener { menuItem ->
                 val self = weakSelf.get() ?: return@setOnMenuItemClickListener true
                 if (menuItem.itemId >= overflowItems.size) {
-                    self.onBottomControlHide()
+                    self.hideToolbar()
                 } else {
                     when (val action = overflowItems[menuItem.itemId].action) {
                         is InstantAction -> {
@@ -2453,9 +2255,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main),
         private const val CELESTIA_EXTRA_FOLDER_NAME = "${CELESTIA_ROOT_FOLDER_NAME}/extras"
         private const val CELESTIA_SCRIPT_FOLDER_NAME = "${CELESTIA_ROOT_FOLDER_NAME}/scripts"
 
-        private const val TOOLBAR_ACTIONS_TAG = "toolbar_actions"
-        private const val TOOLBAR_OVERFLOW_ACTIONS_TAG = "toolbar_overflow_actions"
-        private const val TOOLBAR_VISIBLE_TAG = "toolbar_visible"
         private const val ARG_INITIAL_URL_CHECK_PERFORMED = "initial-url-check-performed"
 
         private const val FILE_PROVIDER_AUTHORITY = "space.celestia.mobilecelestia.fileprovider"

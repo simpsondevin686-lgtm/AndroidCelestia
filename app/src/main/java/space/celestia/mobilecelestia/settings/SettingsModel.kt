@@ -225,6 +225,7 @@ private val staticTimeAndRegionItems: List<SettingsItem> = listOf(
                 Pair(0, CelestiaString("Default", "")),
                 Pair(1, CelestiaString("YYYY MMM DD HH:MM:SS TZ", "")),
                 Pair(2, CelestiaString("UTC Offset", "")),
+                Pair(3, CelestiaString("ISO 8601", "")),
             ), displayName = SettingsKey.DateFormat.displayName, defaultSelection = 1, showTitle = false)
         )
     ),

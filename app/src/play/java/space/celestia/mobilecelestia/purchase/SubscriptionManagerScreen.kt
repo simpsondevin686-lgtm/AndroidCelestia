@@ -511,12 +511,21 @@ private fun PlanList(purchaseManager: PurchaseManagerImpl, productDetails: Produ
             CelestiaString("Your purchase is pending", "")
         }
 
-        is PurchaseManagerImpl.SubscriptionStatus.Good.NotAcknowledged -> {
+        is PurchaseManagerImpl.SubscriptionStatus.Good.NotAcknowledged,
+        is PurchaseManagerImpl.SubscriptionStatus.Good.Acknowledged,
+        is PurchaseManagerImpl.SubscriptionStatus.Good.NotVerified -> {
             CelestiaString("We are processing your purchase", "")
         }
 
-        is PurchaseManagerImpl.SubscriptionStatus.Good.Acknowledged, is PurchaseManagerImpl.SubscriptionStatus.Good.NotVerified, is PurchaseManagerImpl.SubscriptionStatus.Good.Verified -> {
-            CelestiaString("Congratulations, you are a Celestia PLUS user", "")
+        is PurchaseManagerImpl.SubscriptionStatus.Good.Verified -> {
+            if (purchaseManager.didPurchaseInCurrentSession) {
+                CelestiaString(
+                    "Congratulations, you are a Celestia PLUS user. Restart Celestia for your purchase to take effect.",
+                    "Purchase success message with restart guidance"
+                )
+            } else {
+                CelestiaString("Congratulations, you are a Celestia PLUS user", "")
+            }
         }
     }
     Text(text = text, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyLarge)

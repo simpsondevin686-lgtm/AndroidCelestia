@@ -43,6 +43,9 @@ class PurchaseManagerImpl(context: Context, val purchaseAPI: PurchaseAPIService)
     private var dataStore: PreferenceManager = PreferenceManager(context, "celestia_plus")
     private var cachedPurchaseToken: String?
     private var cachedPurchaseType: PurchaseType?
+    private val purchaseProductsStartedInCurrentSession = mutableSetOf<String>()
+    var didPurchaseInCurrentSession = false
+        private set
 
     init {
         cachedPurchaseToken = dataStore[purchaseTokenCacheKey]
@@ -146,9 +149,21 @@ class PurchaseManagerImpl(context: Context, val purchaseAPI: PurchaseAPIService)
     }
 
     internal fun onPurchasesUpdated(result: BillingResult, purchases: MutableList<Purchase>?) {
-        if (result.responseCode != BillingResponseCode.OK) return
+        if (result.responseCode != BillingResponseCode.OK) {
+            purchaseProductsStartedInCurrentSession.clear()
+            return
+        }
         if (purchases == null) return
         for (purchase in purchases) {
+            val startedInCurrentSession = purchase.products.any {
+                it in purchaseProductsStartedInCurrentSession
+            }
+            if (startedInCurrentSession && purchase.purchaseState == PurchaseState.PURCHASED) {
+                didPurchaseInCurrentSession = true
+                purchaseProductsStartedInCurrentSession.removeAll(purchase.products.toSet())
+            } else if (purchase.purchaseState != PurchaseState.PENDING) {
+                purchaseProductsStartedInCurrentSession.removeAll(purchase.products.toSet())
+            }
             val productType = if (purchase.products.contains(lifetimeProductId)) PurchaseType.Lifetime else PurchaseType.Subscription
             handlePurchase(purchase = purchase, productType = productType)
         }
@@ -199,14 +214,22 @@ class PurchaseManagerImpl(context: Context, val purchaseAPI: PurchaseAPIService)
         } else {
             BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(productDetailsParamsBuilder.build())).build()
         }
-        requireNotNull(billingClient).launchBillingFlow(activity, billingFlowParams)
+        purchaseProductsStartedInCurrentSession.add(productDetails.productId)
+        val result = requireNotNull(billingClient).launchBillingFlow(activity, billingFlowParams)
+        if (result.responseCode != BillingResponseCode.OK) {
+            purchaseProductsStartedInCurrentSession.remove(productDetails.productId)
+        }
     }
 
     fun createLifetimePurchase(productDetails: ProductDetails, activity: Activity) {
         if (!connected) return
         val productDetailsParamsBuilder = ProductDetailsParams.newBuilder().setProductDetails(productDetails)
         val billingFlowParams = BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(productDetailsParamsBuilder.build())).build()
-        requireNotNull(billingClient).launchBillingFlow(activity, billingFlowParams)
+        purchaseProductsStartedInCurrentSession.add(productDetails.productId)
+        val result = requireNotNull(billingClient).launchBillingFlow(activity, billingFlowParams)
+        if (result.responseCode != BillingResponseCode.OK) {
+            purchaseProductsStartedInCurrentSession.remove(productDetails.productId)
+        }
     }
 
     private fun getValidSubscriptionAsync(handler: (() -> Unit)? = null) {

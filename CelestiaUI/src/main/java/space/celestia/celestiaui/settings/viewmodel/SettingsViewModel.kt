@@ -11,6 +11,7 @@ package space.celestia.celestiaui.settings.viewmodel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,4 +45,9 @@ sealed class Page {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(val appCore: AppCore, val executor: Executor, @param:AppSettings val appSettings: PreferenceManager, @param:AppSettingsNoBackup val appSettingsNoBackup: PreferenceManager, @param:CoreSettings val coreSettings: PreferenceManager, val purchaseManager: PurchaseManager, val defaultFilePaths: FilePaths, @param:ApplicationId val applicationId: String, val settingsEntryProvider: SettingsEntryProvider, val pushNotificationRegistrar: PushNotificationRegistrar) : ViewModel() {
     val backStack = mutableStateListOf<Page>(Page.Home)
+    val visibilityRevision = mutableIntStateOf(0)
+
+    fun refreshSettingVisibility() {
+        visibilityRevision.intValue += 1
+    }
 }

@@ -33,6 +33,7 @@ import space.celestia.celestiaui.settings.viewmodel.SettingsSwitchItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsToolbarItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsUnknownTextItem
 import space.celestia.celestiaui.settings.viewmodel.settingUnmarkAllID
+import space.celestia.celestiaui.settings.viewmodel.visibleWhen
 import space.celestia.celestiaui.utils.CelestiaString
 import space.celestia.celestiaui.utils.PreferenceManager
 import java.text.NumberFormat
@@ -324,10 +325,17 @@ private val staticRendererItems: List<SettingsItem> = listOf(
                 SettingsSelectionSingleItem(key = SettingsKey.ToneMapping, options = listOf(
                     Pair(0, CelestiaString("Off", "Tone mapping mode")),
                     Pair(1, CelestiaString("Manual", "Tone mapping mode")),
-                ), displayName = SettingsKey.ToneMapping.displayName, defaultSelection = 0),
-                SettingsSliderItem(SettingsKey.Exposure, 0.01, 100.0, isLogarithmic = true),
+                ), displayName = SettingsKey.ToneMapping.displayName, defaultSelection = 0).visibleWhen { viewModel ->
+                    viewModel.appSettings[PreferenceManager.PredefinedKey.SRGBRendering] == "true"
+                },
+                SettingsSliderItem(SettingsKey.Exposure, 0.01, 100.0, isLogarithmic = true).visibleWhen { viewModel ->
+                    val srgbEnabled = viewModel.appSettings[PreferenceManager.PredefinedKey.SRGBRendering] == "true"
+                    val toneMapping = viewModel.coreSettings[PreferenceManager.CustomKey(SettingsKey.ToneMapping.valueString)]?.toIntOrNull()
+                        ?: viewModel.appCore.getIntValueForField(SettingsKey.ToneMapping.valueString)
+                    srgbEnabled && toneMapping == 1
+                },
             ),
-            footer = Footer.Text(CelestiaString("Tone mapping and exposure only affect sRGB rendering. Changes to sRGB rendering take effect after a restart.", "Output rendering settings footnote"))
+            footer = Footer.Text(CelestiaString("Changes to sRGB rendering take effect after a restart.", "Output rendering settings footnote"))
         ),
         SettingsCommonItem.Section(
             header = CelestiaString("External Display", "Section header text for settings"),

@@ -476,6 +476,25 @@ interface SettingsItem {
     val name: String
 }
 
+class SettingsConditionalItem(
+    val item: SettingsItem,
+    private val condition: (SettingsViewModel) -> Boolean
+) : SettingsItem by item {
+    fun isVisible(viewModel: SettingsViewModel): Boolean {
+        viewModel.visibilityRevision.intValue
+        return item.isVisible(viewModel) && condition(viewModel)
+    }
+}
+
+fun SettingsItem.visibleWhen(condition: (SettingsViewModel) -> Boolean): SettingsItem =
+    SettingsConditionalItem(this, condition)
+
+fun SettingsItem.isVisible(viewModel: SettingsViewModel): Boolean =
+    (this as? SettingsConditionalItem)?.isVisible(viewModel) ?: true
+
+fun SettingsItem.resolvedItem(): SettingsItem =
+    (this as? SettingsConditionalItem)?.item?.resolvedItem() ?: this
+
 class SettingsSliderItem(
     private val internalKey: SettingsKey,
     val minValue: Double = 0.0,

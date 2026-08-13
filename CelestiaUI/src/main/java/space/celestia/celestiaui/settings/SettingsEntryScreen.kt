@@ -56,16 +56,19 @@ import space.celestia.celestiaui.settings.viewmodel.SettingsSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsSwitchItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsUnknownTextItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsViewModel
+import space.celestia.celestiaui.settings.viewmodel.isVisible
+import space.celestia.celestiaui.settings.viewmodel.resolvedItem
 import space.celestia.celestiaui.settings.viewmodel.settingUnmarkAllID
 import space.celestia.celestiaui.utils.PreferenceManager
 
 @Composable
 fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, linkClicked: (String, Boolean) -> Unit) {
+    val viewModel: SettingsViewModel = hiltViewModel()
     LazyColumn(modifier = Modifier
         .nestedScroll(rememberNestedScrollInteropConnection()), contentPadding = paddingValues) {
         for (index in item.sections.indices) {
             val section = item.sections[index]
-            item {
+            item(key = "section-$index-header") {
                 val header = section.header
                 if (header.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.list_spacing_short)))
@@ -73,10 +76,11 @@ fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, 
                     Header(text = header)
                 }
             }
-            items(section.rows) { item ->
-                SettingEntry(item = item)
+            val visibleRows = section.rows.withIndex().filter { it.value.isVisible(viewModel) }
+            items(visibleRows, key = { "section-$index-row-${it.index}" }) { indexedItem ->
+                SettingEntry(item = indexedItem.value.resolvedItem(), viewModel = viewModel)
             }
-            item {
+            item(key = "section-$index-footer") {
                 val footer = section.footer
                 when (footer) {
                     is Footer.Text -> {
@@ -111,8 +115,7 @@ fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, 
 }
 
 @Composable
-private fun SettingEntry(item: SettingsItem) {
-    val viewModel: SettingsViewModel = hiltViewModel()
+private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
     val scope = rememberCoroutineScope()
     when (item) {
         is SettingsSwitchItem -> {
@@ -125,6 +128,7 @@ private fun SettingEntry(item: SettingsItem) {
                         on = newValue
                         if (!item.volatile)
                             viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = if (newValue) "1" else "0"
+                        viewModel.refreshSettingVisibility()
                         scope.launch(viewModel.executor.asCoroutineDispatcher()) {
                             viewModel.appCore.setBooleanValueForField(item.key, newValue)
                         }
@@ -135,6 +139,7 @@ private fun SettingEntry(item: SettingsItem) {
                         on = newValue
                         if (!item.volatile)
                             viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = if (newValue) "1" else "0"
+                        viewModel.refreshSettingVisibility()
                         scope.launch(viewModel.executor.asCoroutineDispatcher()) {
                             viewModel.appCore.setBooleanValueForField(item.key, newValue)
                         }
@@ -161,6 +166,7 @@ private fun SettingEntry(item: SettingsItem) {
                 RadioButtonRow(primaryText = option.second, selected = option.first == selected) {
                     selected = option.first
                     viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = option.first.toString()
+                    viewModel.refreshSettingVisibility()
                     scope.launch(viewModel.executor.asCoroutineDispatcher()) {
                         viewModel.appCore.setIntValueForField(item.key, option.first)
                     }
@@ -175,6 +181,7 @@ private fun SettingEntry(item: SettingsItem) {
             SwitchRow(primaryText = item.name, secondaryText = item.subtitle, checked = on, onCheckedChange = { newValue ->
                 on = newValue
                 viewModel.appSettings[item.key] = if (newValue) "true" else "false"
+                viewModel.refreshSettingVisibility()
             })
         }
 
@@ -200,6 +207,7 @@ private fun SettingEntry(item: SettingsItem) {
                     val value = item.options[index].first
                     selected = value
                     viewModel.appSettings[item.key] = value.toString()
+                    viewModel.refreshSettingVisibility()
                 }
             }
         }

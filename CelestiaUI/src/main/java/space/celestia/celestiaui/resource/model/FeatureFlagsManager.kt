@@ -58,7 +58,7 @@ class FeatureFlagsManager(
             val json = JSONObject(stored)
             FeatureFlags(
                 dummy = json.optBoolean("dummy", false),
-                composeSurfaceV5 = json.optBoolean("composeSurfaceV5", true),
+                composeSurfaceV5 = json.optBoolean("composeSurfaceV5", false),
             )
         } catch (_: Throwable) {
             FeatureFlags()

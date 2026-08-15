@@ -32,6 +32,7 @@ import space.celestia.celestiaui.settings.viewmodel.SettingsSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsSwitchItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsToolbarItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsUnknownTextItem
+import space.celestia.celestiaui.settings.viewmodel.SettingsViewModel
 import space.celestia.celestiaui.settings.viewmodel.settingUnmarkAllID
 import space.celestia.celestiaui.settings.viewmodel.visibleWhen
 import space.celestia.celestiaui.utils.CelestiaString
@@ -41,6 +42,13 @@ import java.text.NumberFormat
 private val shadowMapSizeOptions: List<Pair<Int, String>> = run {
     val numberFormat = NumberFormat.getIntegerInstance()
     listOf(0, 1024, 2048, 4096, 8192).map { Pair(it, numberFormat.format(it)) }
+}
+
+private fun isPointSpreadFunctionStarStyle(viewModel: SettingsViewModel): Boolean {
+    val key = SettingsKey.StarStyle.valueString
+    val value = viewModel.coreSettings[PreferenceManager.CustomKey(key)]?.toIntOrNull()
+        ?: viewModel.appCore.getIntValueForField(key)
+    return value == 3
 }
 
 private val staticDisplayItems: List<SettingsItem> = listOf(
@@ -280,6 +288,15 @@ private val staticRendererItems: List<SettingsItem> = listOf(
                         Pair(2, CelestiaString("Scaled Discs", "Star style")),
                         Pair(3, CelestiaString("Point Spread Function", "Star style")),
                     ), displayName = SettingsKey.StarStyle.displayName, defaultSelection = 0),
+                    SettingsSliderItem(SettingsKey.StarPointRadius, 1.0, 10.0, subtitle = CelestiaString("Pixel radius of a unit-irradiance star sprite.", "PSF star setting footnote")).visibleWhen { isPointSpreadFunctionStarStyle(it) },
+                    SettingsSliderItem(SettingsKey.StarOptimization, 0.05, 1.0, subtitle = CelestiaString("Extent of the eye PSF glow around bright stars. Lower values widen the glow at higher GPU cost.", "PSF star setting footnote")).visibleWhen { isPointSpreadFunctionStarStyle(it) },
+                    SettingsSliderItem(SettingsKey.StarMaxIrradiance, 1.0, 1000000.0, isLogarithmic = true, subtitle = CelestiaString("Soft upper limit on per-star peak irradiance to prevent bloom saturation.", "PSF star setting footnote")).visibleWhen { isPointSpreadFunctionStarStyle(it) },
+                    SettingsSliderItem(SettingsKey.StarDimClipFactor, 1.0, 100.0, subtitle = CelestiaString("Soft-clips dim stars below this multiple of the perceptual visibility floor.", "PSF star setting footnote")).visibleWhen { isPointSpreadFunctionStarStyle(it) },
+                    SettingsSliderItem(SettingsKey.StarExposure, 0.01, 1000000.0, isLogarithmic = true, subtitle = CelestiaString("Brightness multiplier applied to every star, extending the visible magnitude limit.", "PSF star setting footnote")).visibleWhen { isPointSpreadFunctionStarStyle(it) },
+                )
+            ),
+            SettingsCommonItem.Section(
+                listOf(
                     SettingsSelectionSingleItem(key = SettingsKey.StarColors, options = listOf(
                         Pair(0, CelestiaString("Classic Colors", "Star colors option")),
                         Pair(1, CelestiaString("Blackbody D65", "Star colors option")),
@@ -289,15 +306,6 @@ private val staticRendererItems: List<SettingsItem> = listOf(
                     SettingsSliderItem(SettingsKey.TintSaturation, 0.0, 1.0),
                 ), footer = Footer.Text(CelestiaString("Tinted illumination saturation setting is only effective with Blackbody star colors.", ""))
             ),
-            SettingsCommonItem.Section(
-                listOf(
-                    SettingsSliderItem(SettingsKey.StarPointRadius, 1.0, 10.0, subtitle = CelestiaString("Pixel radius of a unit-irradiance star sprite.", "PSF star setting footnote")),
-                    SettingsSliderItem(SettingsKey.StarOptimization, 0.05, 1.0, subtitle = CelestiaString("Extent of the eye PSF glow around bright stars. Lower values widen the glow at higher GPU cost.", "PSF star setting footnote")),
-                    SettingsSliderItem(SettingsKey.StarMaxIrradiance, 1.0, 1000000.0, isLogarithmic = true, subtitle = CelestiaString("Soft upper limit on per-star peak irradiance to prevent bloom saturation.", "PSF star setting footnote")),
-                    SettingsSliderItem(SettingsKey.StarDimClipFactor, 1.0, 100.0, subtitle = CelestiaString("Soft-clips dim stars below this multiple of the perceptual visibility floor.", "PSF star setting footnote")),
-                    SettingsSliderItem(SettingsKey.StarExposure, 0.01, 1000000.0, isLogarithmic = true, subtitle = CelestiaString("Brightness multiplier applied to every star, extending the visible magnitude limit.", "PSF star setting footnote")),
-                ), header = CelestiaString("Point Spread Function", "Star style"), footer = Footer.Text(CelestiaString("Point spread function settings are only effective with the Point Spread Function star style.", ""))
-            )
         )
     ),
     SettingsCommonItem(CelestiaString("Render Parameters", "Render parameters in setting"), listOf(

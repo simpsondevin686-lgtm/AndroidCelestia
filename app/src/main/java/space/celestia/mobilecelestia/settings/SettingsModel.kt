@@ -20,8 +20,10 @@ import space.celestia.celestiaui.settings.viewmodel.SettingsCurrentTimeItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsDataLocationItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsFontItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsItem
+import space.celestia.celestiaui.settings.viewmodel.SettingsIntegerSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsKey
 import space.celestia.celestiaui.settings.viewmodel.SettingsLanguageItem
+import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceIntegerSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceSelectionItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceSwitchItem
@@ -37,12 +39,8 @@ import space.celestia.celestiaui.settings.viewmodel.settingUnmarkAllID
 import space.celestia.celestiaui.settings.viewmodel.visibleWhen
 import space.celestia.celestiaui.utils.CelestiaString
 import space.celestia.celestiaui.utils.PreferenceManager
-import java.text.NumberFormat
 
-private val shadowMapSizeOptions: List<Pair<Int, String>> = run {
-    val numberFormat = NumberFormat.getIntegerInstance()
-    listOf(0, 1024, 2048, 4096, 8192).map { Pair(it, numberFormat.format(it)) }
-}
+private val shadowMapSizes = listOf(0, 1024, 2048, 4096, 8192)
 
 private fun isPointSpreadFunctionStarStyle(viewModel: SettingsViewModel): Boolean {
     val key = SettingsKey.StarStyle.valueString
@@ -110,26 +108,25 @@ private val staticDisplayItems: List<SettingsItem> = listOf(
         SettingsSwitchItem(SettingsKey.ShowLatinConstellationLabels, SettingsSwitchItem.Representation.Checkmark),
         SettingsSwitchItem(SettingsKey.ShowBoundaries, SettingsSwitchItem.Representation.Checkmark),
     )),
-    SettingsCommonItem.create(CelestiaString("Object Labels", "Labels"), listOf(
-        SettingsSwitchItem(SettingsKey.ShowStarLabels),
-        SettingsSwitchItem(SettingsKey.ShowPlanetLabels),
-        SettingsSwitchItem(SettingsKey.ShowDwarfPlanetLabels),
-        SettingsSwitchItem(SettingsKey.ShowMoonLabels),
-        SettingsSwitchItem(SettingsKey.ShowMinorMoonLabels),
-        SettingsSwitchItem(SettingsKey.ShowAsteroidLabels),
-        SettingsSwitchItem(SettingsKey.ShowCometLabels),
-        SettingsSwitchItem(SettingsKey.ShowSpacecraftLabels),
-        SettingsSwitchItem(SettingsKey.ShowGalaxyLabels),
-        SettingsSwitchItem(SettingsKey.ShowNebulaLabels),
-        SettingsSwitchItem(SettingsKey.ShowGlobularLabels),
-        SettingsSwitchItem(SettingsKey.ShowOpenClusterLabels)
-    )),
-    SettingsCommonItem(CelestiaString("Locations", "Location labels to display"), listOf(
+    SettingsCommonItem(CelestiaString("Labels", "Labels to display"), listOf(
         SettingsCommonItem.Section(listOf(
+            SettingsSwitchItem(SettingsKey.ShowStarLabels),
+            SettingsSwitchItem(SettingsKey.ShowPlanetLabels),
+            SettingsSwitchItem(SettingsKey.ShowDwarfPlanetLabels),
+            SettingsSwitchItem(SettingsKey.ShowMoonLabels),
+            SettingsSwitchItem(SettingsKey.ShowMinorMoonLabels),
+            SettingsSwitchItem(SettingsKey.ShowAsteroidLabels),
+            SettingsSwitchItem(SettingsKey.ShowCometLabels),
+            SettingsSwitchItem(SettingsKey.ShowSpacecraftLabels),
+            SettingsSwitchItem(SettingsKey.ShowGalaxyLabels),
+            SettingsSwitchItem(SettingsKey.ShowNebulaLabels),
+            SettingsSwitchItem(SettingsKey.ShowGlobularLabels),
+            SettingsSwitchItem(SettingsKey.ShowOpenClusterLabels)
+        )),
+        SettingsCommonItem.Section(
+            rows = listOf(
             SettingsSwitchItem(SettingsKey.ShowLocationLabels, SettingsSwitchItem.Representation.Switch),
             SettingsSliderItem(SettingsKey.MinimumFeatureSize, 0.0, 99.0),
-        )),
-        SettingsCommonItem.Section(listOf(
             SettingsSwitchItem(SettingsKey.ShowCityLabels, SettingsSwitchItem.Representation.Checkmark),
             SettingsSwitchItem(SettingsKey.ShowObservatoryLabels, SettingsSwitchItem.Representation.Checkmark),
             SettingsSwitchItem(SettingsKey.ShowLandingSiteLabels, SettingsSwitchItem.Representation.Checkmark),
@@ -193,7 +190,9 @@ private val staticDisplayItems: List<SettingsItem> = listOf(
             SettingsSwitchItem(SettingsKey.ShowCosmodromeLabels, SettingsSwitchItem.Representation.Checkmark),
             SettingsSwitchItem(SettingsKey.ShowRingLabels, SettingsSwitchItem.Representation.Checkmark),
             SettingsSwitchItem(SettingsKey.ShowOtherLabels, SettingsSwitchItem.Representation.Checkmark),
-        )),
+            ),
+            header = CelestiaString("Locations", "Location labels to display")
+        ),
     )),
     SettingsCommonItem.create(CelestiaString("Markers", ""), listOf(
         SettingsSwitchItem(SettingsKey.ShowMarkers, SettingsSwitchItem.Representation.Switch),
@@ -266,19 +265,9 @@ private val staticTimeAndRegionItems: List<SettingsItem> = listOf(
     SettingsLanguageItem(),
 )
 
-private val staticRendererItems: List<SettingsItem> = listOf(
-    SettingsCommonItem.create(
-        SettingsKey.Resolution.displayName,
-        listOf(
-            SettingsSelectionSingleItem(key = SettingsKey.Resolution, options = listOf(
-                Pair(0, CelestiaString("Low", "Low resolution")),
-                Pair(1, CelestiaString("Medium", "Medium resolution")),
-                Pair(2, CelestiaString("High", "High resolution")),
-            ), displayName = SettingsKey.Resolution.displayName, defaultSelection = 1, showTitle = false)
-        )
-    ),
+private val staticStarsItems: List<SettingsItem> = listOf(
     SettingsCommonItem(
-        SettingsKey.StarStyle.displayName,
+        CelestiaString("Stars", "Star rendering settings"),
         listOf(
             SettingsCommonItem.Section(
                 listOf(
@@ -304,30 +293,80 @@ private val staticRendererItems: List<SettingsItem> = listOf(
                         Pair(3, CelestiaString("Blackbody (Vega Whitepoint)", "Star colors option")),
                     ), displayName = SettingsKey.StarColors.displayName, defaultSelection = 1),
                     SettingsSliderItem(SettingsKey.TintSaturation, 0.0, 1.0),
-                ), footer = Footer.Text(CelestiaString("Tinted illumination saturation setting is only effective with Blackbody star colors.", ""))
+                ),
+                footer = Footer.Text(CelestiaString("Tinted illumination saturation setting is only effective with Blackbody star colors.", ""))
+            ),
+            SettingsCommonItem.Section(
+                listOf(
+                    SettingsSwitchItem(SettingsKey.ShowAutoMag, SettingsSwitchItem.Representation.Switch),
+                    SettingsSliderItem(SettingsKey.FaintestVisible, 3.0, 12.0),
+                )
             ),
         )
     ),
-    SettingsCommonItem(CelestiaString("Render Parameters", "Render parameters in setting"), listOf(
+)
+
+private val staticQualityItems: List<SettingsItem> = listOf(
+    SettingsCommonItem(
+        CelestiaString("Quality", "Rendering quality settings"),
+        listOf(
+            SettingsCommonItem.Section(
+                header = CelestiaString("Textures", "Texture rendering quality settings"),
+                rows = listOf(
+                    SettingsSelectionSingleItem(key = SettingsKey.Resolution, options = listOf(
+                        Pair(0, CelestiaString("Low", "Low resolution")),
+                        Pair(1, CelestiaString("Medium", "Medium resolution")),
+                        Pair(2, CelestiaString("High", "High resolution")),
+                    ), displayName = SettingsKey.Resolution.displayName, defaultSelection = 1),
+                )
+            ),
+            SettingsCommonItem.Section(
+                header = CelestiaString("Shadows", "Shadow rendering quality settings"),
+                rows = listOf(
+                    SettingsPreferenceIntegerSliderItem(
+                        PreferenceManager.PredefinedKey.ShadowMapSize,
+                        displayName = CelestiaString("Shadow Resolution", "Resolution of shadow maps"),
+                        values = shadowMapSizes,
+                        defaultSelection = 0,
+                        subtitle = CelestiaString("A value of 0 disables self-shadowing. Higher values produce sharper shadows at a greater performance cost.", "Shadow resolution setting footnote")
+                    )
+                ),
+                footer = Footer.Text(CelestiaString("Shadow resolution changes take effect after a restart.", "Change requires a restart"))
+            ),
+            SettingsCommonItem.Section(
+                header = CelestiaString("Display", "Display quality settings"),
+                rows = listOf(
+                    SettingsPreferenceSwitchItem(PreferenceManager.PredefinedKey.FullDPI, CelestiaString("HiDPI", "HiDPI support in display"), true),
+                    SettingsPreferenceSwitchItem(PreferenceManager.PredefinedKey.MSAA, CelestiaString("Anti-aliasing", "")),
+                ),
+                footer = Footer.Text(CelestiaString("Configuration will take effect after a restart.", "Change requires a restart"))
+            ),
+            SettingsCommonItem.Section(
+                header = CelestiaString("Atmosphere", "Atmosphere rendering quality settings"),
+                rows = listOf(
+                    SettingsIntegerSliderItem(SettingsKey.AtmosphereSegmentCount, 1, 16, subtitle = CelestiaString("Number of segments used to integrate atmospheric scattering. Higher values improve quality at a greater performance cost.", "Atmosphere segment count setting description")),
+                    SettingsIntegerSliderItem(SettingsKey.CloudSegmentCount, 1, 16, subtitle = CelestiaString("Number of segments used to render clouds. Higher values improve quality at a greater performance cost.", "Cloud segment count setting description")),
+                    SettingsSwitchItem(SettingsKey.SeparateRayleighMieScaleHeights, SettingsSwitchItem.Representation.Switch),
+                )
+            )
+        )
+    ),
+)
+
+private val staticRendererItems: List<SettingsItem> = staticStarsItems + listOf(
+    SettingsCommonItem(CelestiaString("Rendering", "Rendering settings"), listOf(
         SettingsCommonItem.Section(listOf(
             SettingsSwitchItem(SettingsKey.ShowSmoothLines, SettingsSwitchItem.Representation.Switch),
         )),
         SettingsCommonItem.Section(listOf(
-            SettingsSwitchItem(SettingsKey.ShowAutoMag, SettingsSwitchItem.Representation.Switch),
             SettingsSliderItem(SettingsKey.AmbientLightLevel, 0.0, 1.0),
-            SettingsSliderItem(SettingsKey.FaintestVisible, 3.0, 12.0),
-            SettingsSliderItem(SettingsKey.GalaxyBrightness, 0.0, 1.0)
+            SettingsSliderItem(SettingsKey.GalaxyBrightness, 0.0, 1.0),
         )),
     )),
     SettingsRefreshRateItem(),
-    SettingsCommonItem(CelestiaString("Advanced", "Advanced setting items"), listOf(
-        SettingsCommonItem.Section(listOf(
-            SettingsPreferenceSwitchItem(PreferenceManager.PredefinedKey.FullDPI, CelestiaString("HiDPI", "HiDPI support in display"), true),
-            SettingsPreferenceSwitchItem(PreferenceManager.PredefinedKey.MSAA, CelestiaString("Anti-aliasing", "")),
-            SettingsPreferenceSelectionItem(PreferenceManager.PredefinedKey.ShadowMapSize, displayName = CelestiaString("Shadow Resolution", "Resolution of shadow maps"), options = shadowMapSizeOptions, defaultSelection = 0, subtitle = CelestiaString("A value of 0 disables self-shadowing. Higher values produce sharper shadows at a greater performance cost.", "Shadow resolution setting footnote"))
-        ),  footer = Footer.Text(CelestiaString("Configuration will take effect after a restart.", "Change requires a restart"))),
+) + staticQualityItems + listOf(
+    SettingsCommonItem(CelestiaString("Output", "Output rendering settings"), listOf(
         SettingsCommonItem.Section(
-            header = CelestiaString("Output Rendering", ""),
             rows = listOf(
                 SettingsPreferenceSwitchItem(PreferenceManager.PredefinedKey.SRGBRendering, CelestiaString("sRGB Rendering (Experimental)", "")),
                 SettingsSelectionSingleItem(key = SettingsKey.ToneMapping, options = listOf(

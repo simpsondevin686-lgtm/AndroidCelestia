@@ -112,7 +112,10 @@ object AppModule {
             enableFullResolution = appSettings[PreferenceManager.PredefinedKey.FullDPI] != "false", // default on
             enableMultisample = appSettings[PreferenceManager.PredefinedKey.MSAA] == "true",
             enableSRGBRendering = appSettings[PreferenceManager.PredefinedKey.SRGBRendering] == "true",
-            shadowMapSize = appSettings[PreferenceManager.PredefinedKey.ShadowMapSize]?.toIntOrNull() ?: 0,
+            shadowMapSize = appSettings[PreferenceManager.PredefinedKey.ShadowMapSize]
+                ?.toIntOrNull()
+                ?.takeIf { it in setOf(0, 1024, 2048, 4096, 8192) }
+                ?: 0,
             pickSensitivity = appSettings[PreferenceManager.PredefinedKey.PickSensitivity]?.toFloatOrNull() ?: 10.0f
         )
     }

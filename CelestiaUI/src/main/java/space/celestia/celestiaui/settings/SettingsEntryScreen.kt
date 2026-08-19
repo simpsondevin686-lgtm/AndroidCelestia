@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -48,6 +49,8 @@ import space.celestia.celestiaui.settings.viewmodel.Footer
 import space.celestia.celestiaui.settings.viewmodel.SettingsActionItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsCommonItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsItem
+import space.celestia.celestiaui.settings.viewmodel.SettingsIntegerSliderItem
+import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceIntegerSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceSelectionItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceSliderItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsPreferenceSwitchItem
@@ -60,6 +63,7 @@ import space.celestia.celestiaui.settings.viewmodel.isVisible
 import space.celestia.celestiaui.settings.viewmodel.resolvedItem
 import space.celestia.celestiaui.settings.viewmodel.settingUnmarkAllID
 import space.celestia.celestiaui.utils.PreferenceManager
+import java.text.NumberFormat
 
 @Composable
 fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, linkClicked: (String, Boolean) -> Unit) {
@@ -232,6 +236,28 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
             }))
         }
 
+        is SettingsIntegerSliderItem -> {
+            var value by remember {
+                mutableFloatStateOf(viewModel.appCore.getIntValueForField(item.key).toFloat())
+            }
+            SliderRow(
+                primaryText = item.name,
+                secondaryText = item.subtitle,
+                value = value,
+                valueRange = item.minValue.toFloat()..item.maxValue.toFloat(),
+                steps = item.maxValue - item.minValue - 1,
+                valueText = value.toInt().toString(),
+                onValueChange = { newValue ->
+                    val actual = kotlin.math.round(newValue).toInt()
+                    value = actual.toFloat()
+                    viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = actual.toString()
+                    scope.launch(viewModel.executor.asCoroutineDispatcher()) {
+                        viewModel.appCore.setIntValueForField(item.key, actual)
+                    }
+                }
+            )
+        }
+
         is SettingsSliderItem -> {
             val isLog = item.isLogarithmic
             val minValue = item.minValue
@@ -254,27 +280,77 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
                 }
             }
             val valueRange = if (isLog) 0f..1f else item.minValue.toFloat()..item.maxValue.toFloat()
+            val locale = LocalConfiguration.current.locales[0]
+            val valueFormatter = remember(locale) {
+                NumberFormat.getNumberInstance(locale).apply {
+                    maximumFractionDigits = 2
+                }
+            }
             var value by remember {
                 mutableFloatStateOf(actualToSlider(viewModel.appCore.getDoubleValueForField(item.key)))
             }
-            SliderRow(primaryText = item.name, secondaryText = item.subtitle, value = value, valueRange = valueRange, onValueChange = { newValue ->
-                value = newValue
-                val actual = sliderToActual(newValue)
-                viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = actual.toString()
-                scope.launch(viewModel.executor.asCoroutineDispatcher()) {
-                    viewModel.appCore.setDoubleValueForField(item.key, actual)
+            SliderRow(
+                primaryText = item.name,
+                secondaryText = item.subtitle,
+                value = value,
+                valueRange = valueRange,
+                valueText = valueFormatter.format(sliderToActual(value)),
+                onValueChange = { newValue ->
+                    value = newValue
+                    val actual = sliderToActual(newValue)
+                    viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = actual.toString()
+                    scope.launch(viewModel.executor.asCoroutineDispatcher()) {
+                        viewModel.appCore.setDoubleValueForField(item.key, actual)
+                    }
                 }
-            })
+            )
+        }
+
+        is SettingsPreferenceIntegerSliderItem -> {
+            val storedValue = viewModel.appSettings[item.key]?.toIntOrNull() ?: item.defaultSelection
+            val defaultIndex = item.values.indexOf(item.defaultSelection).coerceAtLeast(0)
+            val locale = LocalConfiguration.current.locales[0]
+            val valueFormatter = remember(locale) {
+                NumberFormat.getIntegerInstance(locale)
+            }
+            var selectedIndex by remember {
+                mutableIntStateOf(item.values.indexOf(storedValue).takeIf { it >= 0 } ?: defaultIndex)
+            }
+            SliderRow(
+                primaryText = item.name,
+                secondaryText = item.subtitle,
+                value = selectedIndex.toFloat(),
+                valueRange = 0f..item.values.lastIndex.toFloat(),
+                steps = item.values.size - 2,
+                valueText = valueFormatter.format(item.values[selectedIndex]),
+                onValueChange = { newValue ->
+                    selectedIndex = kotlin.math.round(newValue).toInt().coerceIn(item.values.indices)
+                    viewModel.appSettings[item.key] = item.values[selectedIndex].toString()
+                }
+            )
         }
 
         is SettingsPreferenceSliderItem -> {
+            val locale = LocalConfiguration.current.locales[0]
+            val valueFormatter = remember(locale) {
+                NumberFormat.getNumberInstance(locale).apply {
+                    maximumFractionDigits = 2
+                }
+            }
             var value by remember {
                 mutableFloatStateOf(viewModel.appSettings[item.key]?.toFloat() ?: item.defaultValue.toFloat())
             }
-            SliderRow(primaryText = item.name, secondaryText = item.subtitle, value = value, valueRange = item.minValue.toFloat()..item.maxValue.toFloat(), onValueChange = { newValue ->
-                value = newValue
-                viewModel.appSettings[item.key] = newValue.toString()
-            })
+            SliderRow(
+                primaryText = item.name,
+                secondaryText = item.subtitle,
+                value = value,
+                valueRange = item.minValue.toFloat()..item.maxValue.toFloat(),
+                valueText = valueFormatter.format(value.toDouble()),
+                onValueChange = { newValue ->
+                    value = newValue
+                    viewModel.appSettings[item.key] = newValue.toString()
+                }
+            )
         }
     }
 }

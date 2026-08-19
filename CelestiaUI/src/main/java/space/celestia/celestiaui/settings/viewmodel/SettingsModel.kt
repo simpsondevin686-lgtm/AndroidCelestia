@@ -138,10 +138,13 @@ enum class SettingsKey : PreferenceManager.Key {
     EnableRayBasedDragging,
     EnableFocusZooming,
     EnableAlignCameraToSurfaceOnLand,
+    SeparateRayleighMieScaleHeights,
     // Int values
     TimeZone,
     DateFormat,
     Resolution,
+    AtmosphereSegmentCount,
+    CloudSegmentCount,
     StarStyle,
     HudDetail,
     MeasurementSystem,
@@ -287,9 +290,12 @@ enum class SettingsKey : PreferenceManager.Key {
             EnableRayBasedDragging -> CelestiaString("Ray-Based Dragging", "")
             EnableFocusZooming -> CelestiaString("Focus Zooming", "")
             EnableAlignCameraToSurfaceOnLand -> CelestiaString("Align to Surface on Landing", "Option to align camera to surface when landing")
+            SeparateRayleighMieScaleHeights -> CelestiaString("Separate Rayleigh and Mie Scale Heights", "Atmosphere rendering quality setting")
             TimeZone -> CelestiaString("Time Zone", "")
             DateFormat -> CelestiaString("Date Format", "")
             Resolution -> CelestiaString("Texture Resolution", "")
+            AtmosphereSegmentCount -> CelestiaString("Atmosphere Segment Count", "Atmosphere rendering quality setting")
+            CloudSegmentCount -> CelestiaString("Cloud Segment Count", "Cloud rendering quality setting")
             StarStyle -> CelestiaString("Star Style", "")
             HudDetail -> CelestiaString("Info Display", "HUD display")
             MeasurementSystem -> CelestiaString("Measure Units", "Measurement system")
@@ -436,6 +442,7 @@ enum class SettingsKey : PreferenceManager.Key {
                 EnableRayBasedDragging,
                 EnableFocusZooming,
                 EnableAlignCameraToSurfaceOnLand,
+                SeparateRayleighMieScaleHeights,
             )
 
         val allIntCases: List<SettingsKey>
@@ -443,6 +450,8 @@ enum class SettingsKey : PreferenceManager.Key {
                 TimeZone,
                 DateFormat,
                 Resolution,
+                AtmosphereSegmentCount,
+                CloudSegmentCount,
                 StarStyle,
                 HudDetail,
                 MeasurementSystem,
@@ -508,6 +517,18 @@ class SettingsSliderItem(
         get() = internalKey.displayName
 }
 
+class SettingsIntegerSliderItem(
+    private val internalKey: SettingsKey,
+    val minValue: Int,
+    val maxValue: Int,
+    val subtitle: String? = null
+) : SettingsItem {
+    val key: String = internalKey.valueString
+
+    override val name: String
+        get() = internalKey.displayName
+}
+
 class SettingsPreferenceSwitchItem(
     val key: PreferenceManager.PredefinedKey,
     private val displayName: String,
@@ -526,6 +547,21 @@ class SettingsPreferenceSliderItem(
     val maxValue: Double = 1.0,
     val defaultValue: Double = 0.0
 ) : SettingsItem {
+    override val name: String
+        get() = displayName
+}
+
+class SettingsPreferenceIntegerSliderItem(
+    val key: PreferenceManager.PredefinedKey,
+    private val displayName: String,
+    val values: List<Int>,
+    val defaultSelection: Int,
+    val subtitle: String? = null
+) : SettingsItem {
+    init {
+        require(values.size >= 2)
+    }
+
     override val name: String
         get() = displayName
 }

@@ -1,8 +1,10 @@
 package space.celestia.celestiaui.compose
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -14,15 +16,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import space.celestia.celestiaui.R
 
 @Composable
-fun SliderRow(primaryText: String, value: Float, valueRange: ClosedFloatingPointRange<Float>, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier, primaryTextColor: Color? = null, secondaryText: String? = null) {
+fun SliderRow(primaryText: String, value: Float, valueRange: ClosedFloatingPointRange<Float>, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier, primaryTextColor: Color? = null, secondaryText: String? = null, steps: Int = 0, valueText: String? = null) {
     Column(horizontalAlignment = Alignment.Start, modifier = modifier.defaultMinSize(minHeight = dimensionResource(id = if (secondaryText != null) R.dimen.list_slider_item_two_line_min_height else R.dimen.list_slider_item_one_line_min_height)).padding(
         horizontal = dimensionResource(id = R.dimen.list_item_medium_margin_horizontal),
         vertical = dimensionResource(id = R.dimen.list_item_medium_margin_vertical)
     )) {
-        Text(text = primaryText, color = primaryTextColor ?: MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyLarge)
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(text = primaryText, color = primaryTextColor ?: MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            if (valueText != null) {
+                Text(text = valueText, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
         if (secondaryText != null) {
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.list_item_gap_vertical)))
             Text(
@@ -32,6 +42,17 @@ fun SliderRow(primaryText: String, value: Float, valueRange: ClosedFloatingPoint
             )
         }
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.list_item_gap_vertical)))
-        Slider(value = value, valueRange = valueRange, onValueChange = onValueChange)
+        Slider(
+            value = value,
+            valueRange = valueRange,
+            steps = steps,
+            onValueChange = onValueChange,
+            modifier = Modifier.semantics {
+                contentDescription = primaryText
+                if (valueText != null) {
+                    stateDescription = valueText
+                }
+            }
+        )
     }
 }

@@ -1086,6 +1086,42 @@ Java_space_celestia_celestia_AppCore_c_1getResolution(JNIEnv *env, jclass clazz,
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1setAtmosphereSegmentCount(JNIEnv*, jclass, jlong pointer, jint value) {
+    auto core = reinterpret_cast<CelestiaCore*>(pointer);
+    core->getRenderer()->setAtmosphereSegmentCount(static_cast<unsigned int>(value));
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_space_celestia_celestia_AppCore_c_1getAtmosphereSegmentCount(JNIEnv*, jclass, jlong pointer) {
+    auto core = reinterpret_cast<CelestiaCore*>(pointer);
+    return static_cast<jint>(core->getRenderer()->getAtmosphereSegmentCount());
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1setCloudSegmentCount(JNIEnv*, jclass, jlong pointer, jint value) {
+    auto core = reinterpret_cast<CelestiaCore*>(pointer);
+    core->getRenderer()->setCloudSegmentCount(static_cast<unsigned int>(value));
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_space_celestia_celestia_AppCore_c_1getCloudSegmentCount(JNIEnv*, jclass, jlong pointer) {
+    auto core = reinterpret_cast<CelestiaCore*>(pointer);
+    return static_cast<jint>(core->getRenderer()->getCloudSegmentCount());
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1setSeparateRayleighMieScaleHeights(JNIEnv*, jclass, jlong pointer, jboolean value) {
+    auto core = reinterpret_cast<CelestiaCore*>(pointer);
+    core->getRenderer()->setSeparateRayleighMieScaleHeights(value == JNI_TRUE);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_space_celestia_celestia_AppCore_c_1getSeparateRayleighMieScaleHeights(JNIEnv*, jclass, jlong pointer) {
+    auto core = reinterpret_cast<CelestiaCore*>(pointer);
+    return core->getRenderer()->getSeparateRayleighMieScaleHeights() ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_space_celestia_celestia_AppCore_c_1setHudDetail(JNIEnv *env, jclass clazz, jlong pointer, jint value) {
     auto core = (CelestiaCore *)pointer;
     core->setHudDetail(value);

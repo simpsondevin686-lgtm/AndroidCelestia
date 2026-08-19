@@ -269,6 +269,7 @@ list(APPEND CELESTIA_SOURCES
         ${CELESTIA_SRC_DIR}/celengine/asterism.h
         ${CELESTIA_SRC_DIR}/celengine/astroobj.h
         ${CELESTIA_SRC_DIR}/celengine/asyncresourcecache.h
+        ${CELESTIA_SRC_DIR}/celengine/atmosphere.cpp
         ${CELESTIA_SRC_DIR}/celengine/atmosphere.h
         ${CELESTIA_SRC_DIR}/celengine/axisarrow.cpp
         ${CELESTIA_SRC_DIR}/celengine/axisarrow.h

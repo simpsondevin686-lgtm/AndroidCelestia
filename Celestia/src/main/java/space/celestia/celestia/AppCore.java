@@ -906,6 +906,18 @@ public class AppCore {
     public int getResolution() { return c_getResolution(pointer); }
     private static native void c_setResolution(long pointer, int resolution);
     private static native int c_getResolution(long pointer);
+    public void setAtmosphereSegmentCount(int count) { c_setAtmosphereSegmentCount(pointer, count); }
+    public int getAtmosphereSegmentCount() { return c_getAtmosphereSegmentCount(pointer); }
+    private static native void c_setAtmosphereSegmentCount(long pointer, int count);
+    private static native int c_getAtmosphereSegmentCount(long pointer);
+    public void setCloudSegmentCount(int count) { c_setCloudSegmentCount(pointer, count); }
+    public int getCloudSegmentCount() { return c_getCloudSegmentCount(pointer); }
+    private static native void c_setCloudSegmentCount(long pointer, int count);
+    private static native int c_getCloudSegmentCount(long pointer);
+    public void setSeparateRayleighMieScaleHeights(boolean enabled) { c_setSeparateRayleighMieScaleHeights(pointer, enabled); }
+    public boolean getSeparateRayleighMieScaleHeights() { return c_getSeparateRayleighMieScaleHeights(pointer); }
+    private static native void c_setSeparateRayleighMieScaleHeights(long pointer, boolean enabled);
+    private static native boolean c_getSeparateRayleighMieScaleHeights(long pointer);
     public void setStarStyle(int starStyle) { c_setStarStyle(pointer, starStyle);}
     public int getStarStyle() { return c_getStarStyle(pointer); }
     private static native void c_setStarStyle(long pointer, int starStyle);

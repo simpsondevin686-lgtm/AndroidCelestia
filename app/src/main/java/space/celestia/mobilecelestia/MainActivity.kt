@@ -289,6 +289,7 @@ class MainActivity : AppCompatActivity(),
     // Context menu
     private val isContextMenuEnabled by lazy { appSettings[PreferenceManager.PredefinedKey.ContextMenu] != "false" }
     private var pendingTarget: Selection? = null
+    private var pendingReferenceMarkStates: Map<String, Boolean> = emptyMap()
     private val browserItems: ArrayList<BrowserItem> = arrayListOf()
     private var contextMenuView: View? = null
 
@@ -1438,9 +1439,18 @@ class MainActivity : AppCompatActivity(),
 
     override fun requestContextMenu(x: Float, y: Float, selection: Selection) {
         if (selection.isEmpty) return
-        pendingTarget = selection
-        lifecycleScope.launch {
-            contextMenuView?.showContextMenu(x / rendererSettings.scaleFactor, y / rendererSettings.scaleFactor)
+        lifecycleScope.launch(executor.asCoroutineDispatcher()) {
+            val referenceMarkStates = if (selection.`object` is Body) {
+                listOf("body axes", "frame axes", "sun direction", "velocity vector", "planetographic grid", "terminator")
+                    .associateWith { appCore.getReferenceMarkEnabled(it, selection) }
+            } else {
+                emptyMap()
+            }
+            withContext(Dispatchers.Main) {
+                pendingTarget = selection
+                pendingReferenceMarkStates = referenceMarkStates
+                contextMenuView?.showContextMenu(x / rendererSettings.scaleFactor, y / rendererSettings.scaleFactor)
+            }
         }
     }
 
@@ -1539,6 +1549,29 @@ class MainActivity : AppCompatActivity(),
                     }
                 }
             }
+
+            val referenceVectors = listOf(
+                CelestiaString("Show Body Axes", "Reference vector") to "body axes",
+                CelestiaString("Show Frame Axes", "Reference vector") to "frame axes",
+                CelestiaString("Show Sun Direction", "Reference vector") to "sun direction",
+                CelestiaString("Show Velocity Vector", "Reference vector") to "velocity vector",
+                CelestiaString("Show Planetographic Grid", "Reference vector") to "planetographic grid",
+                CelestiaString("Show Terminator", "Reference vector") to "terminator",
+            )
+            val referenceVectorMenu = menu.addSubMenu(GROUP_REFERENCE_VECTOR_TOP, 0, Menu.NONE, CelestiaString("Reference Vectors", "Reference vectors for an object"))
+            referenceVectors.forEachIndexed { index, (title, referenceMark) ->
+                val isEnabled = pendingReferenceMarkStates[referenceMark] ?: false
+                referenceVectorMenu.add(GROUP_REFERENCE_VECTOR, index, Menu.NONE, title)
+                    .setCheckable(true)
+                    .setChecked(isEnabled)
+                    .setOnMenuItemClickListener {
+                        lifecycleScope.launch(executor.asCoroutineDispatcher()) {
+                            appCore.toggleReferenceMark(referenceMark, selection)
+                        }
+                        true
+                    }
+            }
+            referenceVectorMenu.setGroupCheckable(GROUP_REFERENCE_VECTOR, true, false)
         }
 
         val markMenu = menu.addSubMenu(GROUP_MARK_TOP, 0, Menu.NONE, CelestiaString("Mark", "Mark an object"))
@@ -2284,6 +2317,8 @@ class MainActivity : AppCompatActivity(),
         private const val GROUP_GET_INFO = 8
         private const val GROUP_BROWSER_ITEM_GET_INFO = 9
         private const val GROUP_HEADER = 10
+        private const val GROUP_REFERENCE_VECTOR_TOP = 11
+        private const val GROUP_REFERENCE_VECTOR = 12
 
         private const val CURRENT_DATA_VERSION = "176"
         // 176: 26.8.1 Localization update data update (72d16fc97bc0a6af4f32123d12d21779e4978336)

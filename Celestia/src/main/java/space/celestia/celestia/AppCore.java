@@ -1038,8 +1038,18 @@ public class AppCore {
     public boolean getShowTerminator() { return c_getReferenceMarkEnabled(pointer, "terminator"); }
     public void setShowTerminator(boolean value) { c_toggleReferenceMarkEnabled(pointer, "terminator"); }
 
+    public boolean getReferenceMarkEnabled(String referenceMark, Selection selection) {
+        return c_getReferenceMarkEnabledForSelection(pointer, referenceMark, selection);
+    }
+
+    public void toggleReferenceMark(String referenceMark, Selection selection) {
+        c_toggleReferenceMarkForSelection(pointer, referenceMark, selection);
+    }
+
     private static native boolean c_getReferenceMarkEnabled(long ptr, String str);
     private static native void c_toggleReferenceMarkEnabled(long ptr, String str);
+    private static native boolean c_getReferenceMarkEnabledForSelection(long ptr, String str, Selection selection);
+    private static native void c_toggleReferenceMarkForSelection(long ptr, String str, Selection selection);
 
     public boolean getEnableRayBasedDragging() { return c_getEnableRayBasedDragging(pointer); }
     public void setEnableRayBasedDragging(boolean value) { c_setEnableRayBasedDragging(pointer, value); }

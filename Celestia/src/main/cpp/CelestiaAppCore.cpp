@@ -1466,6 +1466,33 @@ Java_space_celestia_celestia_AppCore_c_1toggleReferenceMarkEnabled(JNIEnv *env,
 }
 
 extern "C"
+JNIEXPORT jboolean JNICALL
+Java_space_celestia_celestia_AppCore_c_1getReferenceMarkEnabledForSelection(JNIEnv *env,
+                                                                             jclass clazz,
+                                                                             jlong ptr,
+                                                                             jstring str,
+                                                                             jobject selection) {
+    auto core = reinterpret_cast<CelestiaCore *>(ptr);
+    const char *c_str = env->GetStringUTFChars(str, nullptr);
+    bool enabled = core->referenceMarkEnabled(c_str, javaSelectionAsSelection(env, selection));
+    env->ReleaseStringUTFChars(str, c_str);
+    return enabled ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1toggleReferenceMarkForSelection(JNIEnv *env,
+                                                                        jclass clazz,
+                                                                        jlong ptr,
+                                                                        jstring str,
+                                                                        jobject selection) {
+    auto core = reinterpret_cast<CelestiaCore *>(ptr);
+    const char *c_str = env->GetStringUTFChars(str, nullptr);
+    core->toggleReferenceMark(c_str, javaSelectionAsSelection(env, selection));
+    env->ReleaseStringUTFChars(str, c_str);
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_space_celestia_celestia_AppCore_c_1setPickTolerance(JNIEnv *env,
                                                                     jclass clazz, jlong ptr,

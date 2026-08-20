@@ -27,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -280,9 +279,8 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
                 }
             }
             val valueRange = if (isLog) 0f..1f else item.minValue.toFloat()..item.maxValue.toFloat()
-            val locale = LocalConfiguration.current.locales[0]
-            val valueFormatter = remember(locale) {
-                NumberFormat.getNumberInstance(locale).apply {
+            val valueFormatter = remember {
+                NumberFormat.getNumberInstance().apply {
                     maximumFractionDigits = 2
                 }
             }
@@ -309,9 +307,8 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
         is SettingsPreferenceIntegerSliderItem -> {
             val storedValue = viewModel.appSettings[item.key]?.toIntOrNull() ?: item.defaultSelection
             val defaultIndex = item.values.indexOf(item.defaultSelection).coerceAtLeast(0)
-            val locale = LocalConfiguration.current.locales[0]
-            val valueFormatter = remember(locale) {
-                NumberFormat.getIntegerInstance(locale)
+            val valueFormatter = remember {
+                NumberFormat.getIntegerInstance()
             }
             var selectedIndex by remember {
                 mutableIntStateOf(item.values.indexOf(storedValue).takeIf { it >= 0 } ?: defaultIndex)
@@ -331,9 +328,8 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
         }
 
         is SettingsPreferenceSliderItem -> {
-            val locale = LocalConfiguration.current.locales[0]
-            val valueFormatter = remember(locale) {
-                NumberFormat.getNumberInstance(locale).apply {
+            val valueFormatter = remember {
+                NumberFormat.getNumberInstance().apply {
                     maximumFractionDigits = 2
                 }
             }

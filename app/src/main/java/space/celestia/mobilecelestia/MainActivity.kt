@@ -42,7 +42,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -55,6 +57,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -1982,9 +1986,46 @@ class MainActivity : AppCompatActivity(),
     @Composable
     private fun MainContent() {
         val safeAreaInsets = rememberSafeAreaInsets()
+        val density = LocalDensity.current
+        val bottomControlMargin = dimensionResource(space.celestia.celestiaui.R.dimen.common_page_medium_margin_vertical)
+        val bottomControlMarginPx = with(density) { bottomControlMargin.roundToPx() }
+        var bottomControlHeight by remember { mutableIntStateOf(0) }
+        val isBottomControlVisible = viewModel.toolbarVisible.value
+        val bottomControlTransition = updateTransition(
+            targetState = isBottomControlVisible,
+            label = "BottomControlVisibility"
+        )
+        val isBottomControlShowing =
+            bottomControlTransition.currentState ||
+                bottomControlTransition.targetState ||
+                bottomControlTransition.isRunning
+        val rendererSafeAreaInsets = remember(
+            safeAreaInsets.left,
+            safeAreaInsets.top,
+            safeAreaInsets.right,
+            safeAreaInsets.bottom,
+            isBottomControlShowing,
+            bottomControlHeight,
+            bottomControlMarginPx
+        ) {
+            EdgeInsets(
+                left = safeAreaInsets.left,
+                top = safeAreaInsets.top,
+                right = safeAreaInsets.right,
+                bottom = safeAreaInsets.bottom +
+                    if (isBottomControlShowing) bottomControlHeight + bottomControlMarginPx else 0
+            )
+        }
         Box(modifier = Modifier.fillMaxSize()) {
-            RenderContent(safeAreaInsets = safeAreaInsets)
-            PlaybackToolbar(safeAreaInsets = safeAreaInsets)
+            RenderContent(
+                safeAreaInsets = safeAreaInsets,
+                rendererSafeAreaInsets = rendererSafeAreaInsets
+            )
+            PlaybackToolbar(
+                safeAreaInsets = safeAreaInsets,
+                visibilityTransition = bottomControlTransition,
+                onHeightChanged = { bottomControlHeight = it }
+            )
             SheetLayout(
                 safeAreaInsets = safeAreaInsets,
                 visible = viewModel.bottomSheetVisible.value,
@@ -2001,16 +2042,20 @@ class MainActivity : AppCompatActivity(),
     }
 
     @Composable
-    private fun PlaybackToolbar(safeAreaInsets: EdgeInsets) {
+    private fun PlaybackToolbar(
+        safeAreaInsets: EdgeInsets,
+        visibilityTransition: Transition<Boolean>,
+        onHeightChanged: (Int) -> Unit
+    ) {
         val density = LocalDensity.current
         val layoutDirection = LocalLayoutDirection.current
         val startInset = if (layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl) safeAreaInsets.right else safeAreaInsets.left
         val actions = viewModel.toolbarActions.value
         val overflowItems = viewModel.toolbarOverflowActions.value
-        AnimatedVisibility(
-            visible = viewModel.toolbarVisible.value,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
+        visibilityTransition.AnimatedVisibility(
+            visible = { it },
+            enter = fadeIn(tween(BOTTOM_CONTROL_ANIMATION_DURATION_MILLIS)),
+            exit = fadeOut(tween(BOTTOM_CONTROL_ANIMATION_DURATION_MILLIS)),
             modifier = Modifier.fillMaxSize()
         ) {
             Box(
@@ -2032,13 +2077,13 @@ class MainActivity : AppCompatActivity(),
                         content.tag = signature
                         populateToolbarContent(content, actions, overflowItems)
                     }
-                })
+                }, modifier = Modifier.onSizeChanged { onHeightChanged(it.height) })
             }
         }
     }
 
     @Composable
-    private fun RenderContent(safeAreaInsets: EdgeInsets) {
+    private fun RenderContent(safeAreaInsets: EdgeInsets, rendererSafeAreaInsets: EdgeInsets) {
         val viewModel: RendererViewModel = hiltViewModel()
         var currentState by remember { mutableStateOf(viewModel.appStatusReporter.state) }
         if (currentState == AppStatusReporter.State.LOADING_FAILURE || currentState == AppStatusReporter.State.EXTERNAL_LOADING_FAILURE) {
@@ -2066,6 +2111,7 @@ class MainActivity : AppCompatActivity(),
         if (currentState.value >= AppStatusReporter.State.EXTERNAL_LOADING_SUCCESS.value) {
             CelestiaScreen(
                 safeAreaInsets = safeAreaInsets,
+                rendererSafeAreaInsets = rendererSafeAreaInsets,
                 pathToLoad = celestiaDataDirPath,
                 cfgToLoad = celestiaConfigFilePath,
                 addonDirsToLoad = addonPaths,
@@ -2307,6 +2353,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     companion object {
+        private const val BOTTOM_CONTROL_ANIMATION_DURATION_MILLIS = 200
         private const val GROUP_ACTION = 0
         private const val GROUP_ALT_SURFACE_TOP = 1
         private const val GROUP_ALT_SURFACE = 2

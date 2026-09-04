@@ -66,7 +66,7 @@ private val InteractionModeSaver = Saver<CelestiaInteraction.InteractionMode, St
 )
 
 @Composable
-fun CelestiaScreen(safeAreaInsets: EdgeInsets, pathToLoad: String, cfgToLoad: String, addonDirsToLoad: List<String>, languageOverride: String, frameRateOptionEvents: Flow<Int>, reapplyContentScaleEvents: Flow<Unit>, canAcceptKeyEvents: () -> Boolean, showMenu: () -> Unit, showInfo: () -> Unit, showSearch: () -> Unit, goTo: () -> Unit, onInteractionModeChanged: (CelestiaInteraction.InteractionMode) -> Unit, onInteractionViewReady: (View) -> Unit) {
+fun CelestiaScreen(safeAreaInsets: EdgeInsets, rendererSafeAreaInsets: EdgeInsets, pathToLoad: String, cfgToLoad: String, addonDirsToLoad: List<String>, languageOverride: String, frameRateOptionEvents: Flow<Int>, reapplyContentScaleEvents: Flow<Unit>, canAcceptKeyEvents: () -> Boolean, showMenu: () -> Unit, showInfo: () -> Unit, showSearch: () -> Unit, goTo: () -> Unit, onInteractionModeChanged: (CelestiaInteraction.InteractionMode) -> Unit, onInteractionViewReady: (View) -> Unit) {
     val lifeCycleOwner = LocalLifecycleOwner.current
     val viewModel: RendererViewModel = hiltViewModel()
 
@@ -94,7 +94,7 @@ fun CelestiaScreen(safeAreaInsets: EdgeInsets, pathToLoad: String, cfgToLoad: St
             cfgToLoad = cfgToLoad,
             addonDirsToLoad = addonDirsToLoad,
             languageOverride = languageOverride,
-            safeAreaInsets = safeAreaInsets,
+            safeAreaInsets = rendererSafeAreaInsets,
             frameRateOptionEvents = frameRateOptionEvents,
             reapplyContentScaleEvents = reapplyContentScaleEvents,
             celestiaRendererReady = {

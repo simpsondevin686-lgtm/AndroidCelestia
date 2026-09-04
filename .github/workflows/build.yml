@@ -67,7 +67,7 @@ jobs:
       - name: Checkout CelestiaLocalization
         uses: actions/checkout@v4
         with:
-          repository: simpsondevin686-lgtm/CelestiaLocalization
+          repository: celestiamobile/CelestiaLocalization
           path: CelestiaLocalization
           fetch-depth: 0
 

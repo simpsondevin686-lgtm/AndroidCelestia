@@ -9,6 +9,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'releases/*'
@@ -191,20 +192,11 @@ jobs:
         run: ./gradlew bundlePlayRelease -Dorg.gradle.jvmargs=-Xmx3072m
 
       - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $RUNNER_TEMP/celestia.jks
+        run: echo 'Skipping keystore decode (unsigned build)'
 
       - name: Sign APK
         if: matrix.outputFormat == 'apk'
-        run: |
-          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | sort -V | tail -1)
-          for APK in $(find $GITHUB_WORKSPACE/AndroidCelestia -name "*.apk"); do
-            $APKSIGNER sign \
-              --ks $RUNNER_TEMP/celestia.jks \
-              --ks-pass pass:${{ secrets.JARSIGNER_KEYSTORE_PASSWORD }} \
-              --ks-key-alias celestia \
-              --key-pass pass:${{ secrets.JARSIGNER_KEY_PASSWORD }} \
-              "$APK"
-          done
+        run: echo "Skipping APK signing as requested." 
 
       - name: Sign AAB
         if: matrix.outputFormat == 'aab'

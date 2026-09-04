@@ -11,8 +11,9 @@ package space.celestia.celestiaui.pushnotification
 
 interface PushNotificationRegistrar {
     /**
-     * Pushes the user's current registration state (token, prefs, etc.) to the server.
+     * Registers with the push provider, or pushes the current registration state to the server
+     * when [installationId] is provided by the push provider.
      * Implementations should no-op if the user has not opted in to push notifications.
      */
-    suspend fun register()
+    suspend fun register(installationId: String? = null)
 }

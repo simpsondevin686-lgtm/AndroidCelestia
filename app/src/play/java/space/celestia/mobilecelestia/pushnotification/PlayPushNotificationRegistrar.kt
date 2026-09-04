@@ -44,16 +44,25 @@ class PlayPushNotificationRegistrar @Inject constructor(
     private val userAPI: UserAPIService,
     private val platform: Platform
 ) : PushNotificationRegistrar {
-    override suspend fun register() {
+    override suspend fun register(installationId: String?) {
         if (!hasNotificationPermission()) return
-        val token = try {
-            FirebaseMessaging.getInstance().token.await()
-        } catch (_: Throwable) {
+        if (installationId == null) {
+            try {
+                FirebaseMessaging.getInstance().register().await()
+            } catch (_: Throwable) {}
             return
         }
-        appSettingsNoBackup[PreferenceManager.PredefinedKey.FCMToken] = token
+        val previousToken = appSettingsNoBackup[PreferenceManager.PredefinedKey.FCMToken]
         try {
-            userAPI.register(buildRegisterRequest(token, appSettings, platform))
+            userAPI.register(
+                buildRegisterRequest(
+                    installationId = installationId,
+                    previousToken = previousToken,
+                    appSettings = appSettings,
+                    platform = platform
+                )
+            )
+            appSettingsNoBackup[PreferenceManager.PredefinedKey.FCMToken] = installationId
         } catch (_: Throwable) {}
     }
 
@@ -89,8 +98,9 @@ internal fun PreferenceManager.enabledPushContentTypes(): List<String> {
     return list
 }
 
-private fun buildRegisterRequest(token: String, appSettings: PreferenceManager, platform: Platform): RegisterRequest = RegisterRequest(
-    token = token,
+private fun buildRegisterRequest(installationId: String, previousToken: String?, appSettings: PreferenceManager, platform: Platform): RegisterRequest = RegisterRequest(
+    token = installationId,
+    previousToken = previousToken?.takeIf { it != installationId },
     tokenType = "fcm",
     lang = AppCore.getLanguage(),
     timezone = TimeZone.getDefault().id,

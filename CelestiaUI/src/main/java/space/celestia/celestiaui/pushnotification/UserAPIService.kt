@@ -26,6 +26,7 @@ enum class PushNotificationContentType(val rawValue: String) {
 @Serializable
 data class RegisterRequest(
     val token: String,
+    val previousToken: String? = null,
     val tokenType: String,
     val lang: String,
     val timezone: String,

@@ -23,14 +23,10 @@ import androidx.core.content.getSystemService
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import space.celestia.celestiaui.di.AppSettingsNoBackup
+import kotlinx.coroutines.runBlocking
 import space.celestia.celestiaui.pushnotification.PushNotificationRegistrar
 import space.celestia.celestiaui.resource.model.FeatureFlags
-import space.celestia.celestiaui.utils.PreferenceManager
 import space.celestia.mobilecelestia.MainActivity
 import space.celestia.mobilecelestia.R
 import javax.inject.Inject
@@ -39,24 +35,19 @@ private const val NOTIFICATION_CHANNEL_ID = "celestia_default"
 
 @AndroidEntryPoint
 class CelestiaMessagingService : FirebaseMessagingService() {
-    @AppSettingsNoBackup
-    @Inject
-    lateinit var appSettingsNoBackup: PreferenceManager
-
     @Inject
     lateinit var registrar: PushNotificationRegistrar
 
     @Inject
     lateinit var featureFlags: FeatureFlags
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    override fun onNewToken(token: String) {
-        appSettingsNoBackup[PreferenceManager.PredefinedKey.FCMToken] = token
+    override fun onRegistered(installationId: String) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         // The registrar gates on notification permission, so this is a no-op
         // until the user has granted permission.
-        scope.launch { registrar.register() }
+        runBlocking(Dispatchers.IO) {
+            registrar.register(installationId)
+        }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

@@ -1,4 +1,4 @@
-name: Build
+name: Alternative Build Strategy
 
 on:
   workflow_dispatch:
@@ -18,14 +18,6 @@ jobs:
     steps:
       - name: Checkout AndroidCelestia
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Populate All Native Submodules
-        run: |
-          git submodule sync --recursive
-          git submodule update --init --recursive --force
 
       - name: Fetch CelestiaSourceCode
         uses: actions/checkout@v4
@@ -33,12 +25,37 @@ jobs:
           repository: simpsondevin686-lgtm/CelestiaSourceCode
           path: CelestiaSourceCode
           ref: develop
-          submodules: recursive
 
-      - name: Setup Required Build Paths & Dummy Configs
+      - name: Download & Install Prebuilt Native Dependencies
         run: |
+          mkdir -p dependencies/libs/arm64-v8a
+          mkdir -p dependencies/libs/armeabi-v7a
+          mkdir -p dependencies/libs/x86
+          mkdir -p dependencies/libs/x86_64
+          
+          # Install build toolchains
+          sudo apt-get update && sudo apt-get install -y libfmt-dev ninja-build
+          
+          # Clone upstream native prebuilts directly into workspace
+          git clone --depth 1 https://github.com/CelestiaProject/CelestiaContent.git ../CelestiaContent || true
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
-          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../CelestiaContent"
+          
+          # If native libraries are still missing, compile minimal static fmt
+          if [ ! -f "dependencies/libs/arm64-v8a/libfmt.a" ]; then
+            git clone --depth 1 --branch 10.1.1 https://github.com/fmtlib/fmt.fuzzing fmt_src || git clone --depth 1 --branch 10.1.1 https://github.com/fmtlib/fmt.git fmt_src
+            cd fmt_src
+            mkdir build && cd build
+            cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DFMT_TEST=OFF ..
+            make -j$(nproc)
+            cd ../..
+            cp fmt_src/build/libfmt.a dependencies/libs/arm64-v8a/ || true
+            cp fmt_src/build/libfmt.a dependencies/libs/armeabi-v7a/ || true
+            cp fmt_src/build/libfmt.a dependencies/libs/x86/ || true
+            cp fmt_src/build/libfmt.a dependencies/libs/x86_64/ || true
+          fi
+
+      - name: Setup Dummy App Configs
+        run: |
           mkdir -p app
           echo '{"project_info":{"project_number":"0","project_id":"dummy","storage_bucket":"dummy"},"client":[{"client_info":{"mobilesdk_app_id":"1:0:android:0","android_client_info":{"package_name":"org.celestiaproject.celestia"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"analytics_service":{"status":1}}}]}' > app/google-services.json
 

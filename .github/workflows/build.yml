@@ -48,5 +48,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Gradle
-        run: ./gradlew assembleFossDebug
+      - name: Build Unsigned FOSS APK
+        run: ./gradlew assembleFossDebug -x validateSigningFossDebug

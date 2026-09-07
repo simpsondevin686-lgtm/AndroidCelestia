@@ -16,16 +16,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout AndroidCelestia
+      - name: Checkout AndroidCelestia Wrapper
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Checkout CelestiaSourceCode into Celestia directory
+      - name: Checkout CelestiaSourceCode Core
         uses: actions/checkout@v4
         with:
           repository: simpsondevin686-lgtm/CelestiaSourceCode
-          path: Celestia
+          path: Celestia/src/main/cpp
           submodules: recursive
 
       - name: Set up JDK 21

@@ -52,21 +52,21 @@ jobs:
       - name: Checkout Celestia
         uses: actions/checkout@v4
         with:
-          repository: simpsondevin686-lgtm/CelestiaSourceCodeSourceCode
+          repository: simpsondevin686-lgtm/CelestiaSourceCodeSourceCodeSourceCode
           path: Celestia
           fetch-depth: 0
 
       - name: Checkout CelestiaContent
         uses: actions/checkout@v4
         with:
-          repository: CelestiaProject/CelestiaContent
+          repository: CelestiaSourceCodeProject/CelestiaContent
           path: CelestiaContent
           fetch-depth: 0
 
       - name: Checkout CelestiaLocalization
         uses: actions/checkout@v4
         with:
-          repository: simpsondevin686-lgtm/CelestiaSourceCodeSourceCodeLocalization
+          repository: simpsondevin686-lgtm/CelestiaSourceCodeSourceCodeSourceCodeLocalization
           path: CelestiaLocalization
           fetch-depth: 0
 

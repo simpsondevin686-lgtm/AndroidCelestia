@@ -21,6 +21,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Pull Upstream Native Dependencies
+        run: |
+          # Fetch missing native static libraries (.a files) from official Celestia repo
+          git clone --depth 1 https://github.com/CelestiaProject/AndroidCelestia.git upstream_temp
+          mkdir -p dependencies
+          cp -r upstream_temp/dependencies/* dependencies/
+          rm -rf upstream_temp
+
       - name: Fetch CelestiaSourceCode
         uses: actions/checkout@v4
         with:

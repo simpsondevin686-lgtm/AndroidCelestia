@@ -16,10 +16,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout AndroidCelestia with Submodules
+      - name: Checkout AndroidCelestia
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Force Full Recursive Submodule Sync
+        run: |
+          git submodule update --init --recursive --force
 
       - name: Fetch CelestiaSourceCode
         uses: actions/checkout@v4
@@ -27,6 +32,7 @@ jobs:
           repository: simpsondevin686-lgtm/CelestiaSourceCode
           path: CelestiaSourceCode
           ref: develop
+          submodules: recursive
 
       - name: Setup Required Build Paths & Dummy Configs
         run: |

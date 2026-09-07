@@ -30,12 +30,13 @@ jobs:
 
       - name: Setup Required Build Directories
         run: |
-          # Link your core C++ engine files
+          # Link core C++ engine files
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../CelestiaContent"
           
-          # Create placeholder for localization to guarantee zero git checkout failures
-          mkdir -p "$GITHUB_WORKSPACE/../CelestiaLocalization"
+          # Create expected android subfolder for rsync
+          mkdir -p "$GITHUB_WORKSPACE/../CelestiaLocalization/android"
+          touch "$GITHUB_WORKSPACE/../CelestiaLocalization/android/placeholder.po"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4

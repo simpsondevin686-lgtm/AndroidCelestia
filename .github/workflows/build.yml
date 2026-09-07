@@ -21,6 +21,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Checkout CelestiaSourceCode
+        uses: actions/checkout@v4
+        with:
+          repository: simpsondevin686-lgtm/CelestiaSourceCode
+          path: app/src/main/jni/celestia  # Adjust destination path if needed
+          submodules: recursive
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:

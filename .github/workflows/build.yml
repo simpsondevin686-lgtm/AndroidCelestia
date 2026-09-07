@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Fetch CelestiaSourceCode
         uses: actions/checkout@v4
@@ -28,25 +28,18 @@ jobs:
           path: CelestiaSourceCode
           ref: develop
 
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gettext
-
-      - name: Setup Required Build Paths & Placeholders
+      - name: Setup Required Build Paths & Dummy Configs
         run: |
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../CelestiaContent"
-          mkdir -p "$GITHUB_WORKSPACE/../CelestiaLocalization/android"
-          touch "$GITHUB_WORKSPACE/../CelestiaLocalization/android/placeholder.po"
           mkdir -p app
           echo '{"project_info":{"project_number":"0","project_id":"dummy","storage_bucket":"dummy"},"client":[{"client_info":{"mobilesdk_app_id":"1:0:android:0","android_client_info":{"package_name":"org.celestiaproject.celestia"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"analytics_service":{"status":1}}}]}' > app/google-services.json
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug -x processPlayDebugGoogleServices
+      - name: Build Mobile Debug APK
+        run: ./gradlew assembleMobileDebug -x processPlayDebugGoogleServices -Pcelestia.skipLocalization=true

@@ -21,28 +21,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Pull Upstream Native Dependencies
-        run: |
-          # Fetch missing native static libraries (.a files) from official Celestia repo
-          git clone --depth 1 https://github.com/CelestiaProject/AndroidCelestia.git upstream_temp
-          mkdir -p dependencies
-          cp -r upstream_temp/dependencies/* dependencies/
-          rm -rf upstream_temp
-
-      - name: Fetch CelestiaSourceCode
-        uses: actions/checkout@v4
-        with:
-          repository: simpsondevin686-lgtm/CelestiaSourceCode
-          path: CelestiaSourceCode
-          ref: develop
-
-      - name: Setup Required Directory Symlinks
-        run: |
-          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
-          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../CelestiaContent"
-          mkdir -p app
-          echo '{"project_info":{"project_number":"0","project_id":"dummy","storage_bucket":"dummy"},"client":[{"client_info":{"mobilesdk_app_id":"1:0:android:0","android_client_info":{"package_name":"org.celestiaproject.celestia"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"analytics_service":{"status":1}}}]}' > app/google-services.json
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -50,4 +28,4 @@ jobs:
           distribution: 'temurin'
 
       - name: Build Mobile Debug APK
-        run: ./gradlew assembleMobileDebug -x processPlayDebugGoogleServices -Pcelestia.skipLocalization=true
+        run: ./gradlew assembleMobileDebug

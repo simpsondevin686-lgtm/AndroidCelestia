@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout AndroidCelestia
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Fetch CelestiaSourceCode
         uses: actions/checkout@v4
@@ -26,25 +28,10 @@ jobs:
           path: CelestiaSourceCode
           ref: develop
 
-      - name: Download Official Upstream Native Dependencies
+      - name: Setup Required Directory Symlinks
         run: |
-          mkdir -p dependencies
-          # Download official Celestia prebuilt android dependencies
-          curl -L -o deps.zip https://github.com/CelestiaProject/AndroidCelestia/releases/download/1.5.0/dependencies.zip || true
-          if [ -f deps.zip ]; then
-            unzip -o deps.zip -d dependencies/
-          else
-            # Fallback: clone official dependencies repo directly
-            git clone --depth 1 https://github.com/CelestiaProject/AndroidCelestia.git official_repo
-            cp -r official_repo/dependencies/* dependencies/
-          fi
-          
-          # Link required source paths
-          git clone --depth 1 https://github.com/CelestiaProject/CelestiaContent.git ../CelestiaContent || true
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
-
-      - name: Setup Dummy App Configs
-        run: |
+          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../CelestiaContent"
           mkdir -p app
           echo '{"project_info":{"project_number":"0","project_id":"dummy","storage_bucket":"dummy"},"client":[{"client_info":{"mobilesdk_app_id":"1:0:android:0","android_client_info":{"package_name":"org.celestiaproject.celestia"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"analytics_service":{"status":1}}}]}' > app/google-services.json
 

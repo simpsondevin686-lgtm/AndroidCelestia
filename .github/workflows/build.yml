@@ -1,4 +1,4 @@
-name: Alternative Build Strategy
+name: Build
 
 on:
   workflow_dispatch:
@@ -26,33 +26,22 @@ jobs:
           path: CelestiaSourceCode
           ref: develop
 
-      - name: Download & Install Prebuilt Native Dependencies
+      - name: Download Official Upstream Native Dependencies
         run: |
-          mkdir -p dependencies/libs/arm64-v8a
-          mkdir -p dependencies/libs/armeabi-v7a
-          mkdir -p dependencies/libs/x86
-          mkdir -p dependencies/libs/x86_64
+          mkdir -p dependencies
+          # Download official Celestia prebuilt android dependencies
+          curl -L -o deps.zip https://github.com/CelestiaProject/AndroidCelestia/releases/download/1.5.0/dependencies.zip || true
+          if [ -f deps.zip ]; then
+            unzip -o deps.zip -d dependencies/
+          else
+            # Fallback: clone official dependencies repo directly
+            git clone --depth 1 https://github.com/CelestiaProject/AndroidCelestia.git official_repo
+            cp -r official_repo/dependencies/* dependencies/
+          fi
           
-          # Install build toolchains
-          sudo apt-get update && sudo apt-get install -y libfmt-dev ninja-build
-          
-          # Clone upstream native prebuilts directly into workspace
+          # Link required source paths
           git clone --depth 1 https://github.com/CelestiaProject/CelestiaContent.git ../CelestiaContent || true
           ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
-          
-          # If native libraries are still missing, compile minimal static fmt
-          if [ ! -f "dependencies/libs/arm64-v8a/libfmt.a" ]; then
-            git clone --depth 1 --branch 10.1.1 https://github.com/fmtlib/fmt.fuzzing fmt_src || git clone --depth 1 --branch 10.1.1 https://github.com/fmtlib/fmt.git fmt_src
-            cd fmt_src
-            mkdir build && cd build
-            cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DFMT_TEST=OFF ..
-            make -j$(nproc)
-            cd ../..
-            cp fmt_src/build/libfmt.a dependencies/libs/arm64-v8a/ || true
-            cp fmt_src/build/libfmt.a dependencies/libs/armeabi-v7a/ || true
-            cp fmt_src/build/libfmt.a dependencies/libs/x86/ || true
-            cp fmt_src/build/libfmt.a dependencies/libs/x86_64/ || true
-          fi
 
       - name: Setup Dummy App Configs
         run: |

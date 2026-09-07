@@ -16,27 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout AndroidCelestia
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-
-      - name: Fetch CelestiaSourceCode
-        uses: actions/checkout@v4
-        with:
-          repository: simpsondevin686-lgtm/CelestiaSourceCode
-          path: CelestiaSourceCode
-          ref: develop
-
-      - name: Setup Required Build Directories
-        run: |
-          # Link core C++ engine files
-          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
-          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../CelestiaContent"
-          
-          # Create expected android subfolder for rsync
-          mkdir -p "$GITHUB_WORKSPACE/../CelestiaLocalization/android"
-          touch "$GITHUB_WORKSPACE/../CelestiaLocalization/android/placeholder.po"
+          submodules: true
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4

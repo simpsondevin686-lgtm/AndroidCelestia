@@ -34,9 +34,17 @@ jobs:
           repository: celestiamobile/CelestiaLocalization
           path: CelestiaLocalization
 
-      - name: Move CelestiaLocalization to expected parent path
+      - name: Checkout CelestiaContent
+        uses: actions/checkout@v4
+        with:
+          repository: celestiamobile/CelestiaContent
+          path: CelestiaContent
+
+      - name: Link External Workspace Paths
         run: |
-          mv CelestiaLocalization ../CelestiaLocalization
+          ln -s "$GITHUB_WORKSPACE/CelestiaSourceCode" "$GITHUB_WORKSPACE/../Celestia"
+          ln -s "$GITHUB_WORKSPACE/CelestiaContent" "$GITHUB_WORKSPACE/../CelestiaContent"
+          ln -s "$GITHUB_WORKSPACE/CelestiaLocalization" "$GITHUB_WORKSPACE/../CelestiaLocalization"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4

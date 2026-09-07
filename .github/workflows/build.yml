@@ -28,6 +28,12 @@ jobs:
           path: CelestiaSourceCode
           ref: develop
 
+      - name: Checkout CelestiaLocalization
+        uses: actions/checkout@v3
+        with:
+          repository: celestiamobile/CelestiaLocalization
+          path: CelestiaLocalization
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:

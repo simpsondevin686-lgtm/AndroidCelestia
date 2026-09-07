@@ -11,6 +11,9 @@ name: Build
 on:
   workflow_dispatch:
   push:
+    branches: [ develop, main, master ]
+  workflow_dispatch:
+  push:
     branches:
       - 'releases/*'
       - main

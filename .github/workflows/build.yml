@@ -1,4 +1,4 @@
-name: Build
+name: Build Android Celestia APK
 
 on:
   workflow_dispatch:
@@ -7,21 +7,18 @@ on:
       - develop
       - main
       - master
-  pull_request:
-    branches:
-      - develop
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout AndroidCelestia Wrapper
+      - name: Checkout Android Wrapper
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Checkout CelestiaSourceCode Core
+      - name: Checkout Celestia Core Source
         uses: actions/checkout@v4
         with:
           repository: simpsondevin686-lgtm/CelestiaSourceCode
@@ -34,5 +31,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Setup Android NDK & CMake
+        uses: nkmrshn/setup-android-sdk@v1
+
+      - name: Install Host Tools & Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext libgettextpo-dev ninja-build pkg-config libepoxy-dev
+
       - name: Build Mobile Debug APK
-        run: ./gradlew assembleMobileDebug -Pandroid.injected.build.args="-DENABLE_GETTEXT=OFF"
+        run: ./gradlew assembleMobileDebug -Pandroid.injected.build.args="-DENABLE_GETTEXT=OFF -DENABLE_EGL=ON -DENABLE_GLESv3=ON"

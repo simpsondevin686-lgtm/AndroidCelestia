@@ -51,6 +51,7 @@ jobs:
         with:
           repository: simpsondevin686-lgtm/CelestiaSourceCode
           path: Celestia
+          ref: main
           fetch-depth: 0
 
       - name: Checkout CelestiaContent
@@ -76,17 +77,13 @@ jobs:
       - name: Checkout Branch
         if: github.event_name != 'pull_request'
         run: |
-          cd Celestia
-          git checkout origin/${{ github.ref_name }}
-          cd ../CelestiaLocalization
+          cd CelestiaLocalization
           git checkout origin/${{ github.ref_name }}
 
       - name: Checkout Branch (PR)
         if: github.event_name == 'pull_request'
         run: |
-          cd Celestia
-          git checkout origin/${{ github.event.pull_request.base.ref }}
-          cd ../CelestiaLocalization
+          cd CelestiaLocalization
           git checkout origin/${{ github.event.pull_request.base.ref }}
 
       - name: Checkout Content
@@ -163,7 +160,7 @@ jobs:
         working-directory: '${{ github.workspace }}/AndroidCelestia'
         run: |
           BUILD_NUMBER=$((6661 + ${{ github.run_number }}))
-          sed -ie "s/android:versionCode=\"[0-9]*\"/android:versionCode=\"${BUILD_NUMBER}\"/" app/src/main/AndroidManifest.xml
+          sed -ie "s/android:versionCode="[0-9]*"/android:versionCode="${BUILD_NUMBER}"/" app/src/main/AndroidManifest.xml
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
@@ -192,14 +189,11 @@ jobs:
 
       - name: Sign APK
         run: echo 'Skipping APK signing as requested.'
+
       - name: Sign AAB
         if: matrix.outputFormat == 'aab'
         run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-            -keystore $RUNNER_TEMP/celestia.jks \
-            -storepass ${{ secrets.JARSIGNER_KEYSTORE_PASSWORD }} \
-            -keypass ${{ secrets.JARSIGNER_KEY_PASSWORD }} \
-            $GITHUB_WORKSPACE/AndroidCelestia/app/build/outputs/bundle/playRelease/*.aab celestia
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256             -keystore $RUNNER_TEMP/celestia.jks             -storepass ${{ secrets.JARSIGNER_KEYSTORE_PASSWORD }}             -keypass ${{ secrets.JARSIGNER_KEY_PASSWORD }}             $GITHUB_WORKSPACE/AndroidCelestia/app/build/outputs/bundle/playRelease/*.aab celestia
 
       - name: Remove Redundant AAB
         if: matrix.outputFormat == 'aab'

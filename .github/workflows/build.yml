@@ -51,7 +51,7 @@ jobs:
         with:
           repository: simpsondevin686-lgtm/CelestiaSourceCode
           path: Celestia
-          ref: main
+          ref: develop
           fetch-depth: 0
 
       - name: Checkout CelestiaContent

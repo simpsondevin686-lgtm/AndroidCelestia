@@ -1,7 +1,5 @@
 package space.celestia.celestiaui.compose
 
-import space.celestia.mobilecelestia.R
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText

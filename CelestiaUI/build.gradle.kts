@@ -21,7 +21,7 @@ plugins {
 }
 
 android {
-    namespace = "space.celestia.celestiaui"
+    namespace = "space.celestia.mobilecelestia"
     compileSdk = libs.versions.compile.sdk.get().toInt()
     buildToolsVersion = libs.versions.build.tools.get()
 

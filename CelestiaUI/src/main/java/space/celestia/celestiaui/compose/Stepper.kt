@@ -1,7 +1,5 @@
 package space.celestia.celestiaui.compose
 
-import space.celestia.mobilecelestia.R
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

@@ -16,8 +16,6 @@
 
 package space.celestia.celestiaui.compose
 
-import space.celestia.mobilecelestia.R
-
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources

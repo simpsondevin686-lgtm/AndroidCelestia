@@ -18,8 +18,6 @@
 
 package space.celestia.celestiaui.compose
 
-import space.celestia.mobilecelestia.R
-
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.material3.ColorScheme

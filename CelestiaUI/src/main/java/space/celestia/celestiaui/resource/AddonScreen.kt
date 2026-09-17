@@ -9,8 +9,6 @@
 
 package space.celestia.celestiaui.resource
 
-import space.celestia.mobilecelestia.R
-
 import android.os.Parcelable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement

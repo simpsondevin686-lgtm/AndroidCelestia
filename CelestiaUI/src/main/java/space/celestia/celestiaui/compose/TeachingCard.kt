@@ -9,6 +9,8 @@
 
 package space.celestia.celestiaui.compose
 
+import space.celestia.mobilecelestia.R
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding

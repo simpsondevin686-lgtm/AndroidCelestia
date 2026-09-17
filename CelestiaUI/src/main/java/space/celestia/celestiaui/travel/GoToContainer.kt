@@ -1,5 +1,7 @@
 package space.celestia.celestiaui.travel
 
+import space.celestia.mobilecelestia.R
+
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith

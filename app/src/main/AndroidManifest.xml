@@ -12,7 +12,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:installLocation="auto"
+    android:installLocation="auto">
 
     <uses-feature android:name="android.hardware.type.pc" android:required="false" />
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
@@ -26,149 +26,20 @@
         android:dataExtractionRules="@xml/extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:largeHeap="true"
-        android:hasFragileUserData="true"
-        android:theme="@style/AppTheme"
-        android:resizeableActivity="true"
-        android:localeConfig="@xml/locales_config"
-        android:enableOnBackInvokedCallback="true"
-        tools:targetApi="tiramisu">
-
-        <meta-data android:name="WindowManagerPreference:FreeformWindowSize"
-            android:value="[phone|tablet|maximize]" />
-        <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation"
-            android:value="[portrait|landscape]" />
-
+        android:theme="@style/Theme.Celestia"
+        tools:targetApi="31">
+        
         <activity
-            android:name="space.celestia.mobilecelestia.MainActivity"
-            android:configChanges="keyboard|keyboardHidden|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode|locale"
-            android:launchMode="singleInstancePerTask"
+            android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan"
-            tools:ignore="LockedOrientationActivity">
+            android:configChanges="orientation|keyboardHidden|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.Celestia">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data
-                    android:scheme="content"
-                    android:mimeType="*/*"
-                    android:host="*" />
-                <data android:pathPattern=".*\\.cel" />
-                <data android:pathPattern=".*\\..*\\.cel" />
-                <data android:pathPattern=".*\\..*\\..*\\.cel" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cel" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cel" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cel" />
-                <data android:pathPattern=".*\\.celx" />
-                <data android:pathPattern=".*\\..*\\.celx" />
-                <data android:pathPattern=".*\\..*\\..*\\.celx" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.celx" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.celx" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.celx" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="cel"
-                    android:host="*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="celaddon"
-                    android:host="*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="celguide"
-                    android:host="*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="celestia"
-                    android:host="*" />
-            </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="celestia.mobi" />
-                <data android:path="/resources/item" />
-                <data android:pathPrefix="/resources/item/" />
-            </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="celestia.mobi" />
-                <data android:path="/resources/guide" />
-                <data android:pathPrefix="/resources/guide/" />
-            </intent-filter>
         </activity>
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="space.celestia.mobilecelestia.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
-        <service
-            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
-            android:enabled="false"
-            android:exported="false">
-            <meta-data
-                android:name="autoStoreLocales"
-                android:value="true" />
-        </service>
-
-        <meta-data android:name="io.sentry.auto-init" android:value="false" />
-        <property
-            android:name="android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE"
-            android:value="false" />
     </application>
-
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="http" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.SENDTO" />
-            <data android:scheme="mailto" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.SEND_MULTIPLE" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.OPEN_DOCUMENT"/>
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.OPEN_DOCUMENT_TREE"/>
-        </intent>
-    </queries>
 </manifest>

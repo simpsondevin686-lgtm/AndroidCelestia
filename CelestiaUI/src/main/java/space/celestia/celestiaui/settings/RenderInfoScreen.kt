@@ -9,6 +9,8 @@
 
 package space.celestia.celestiaui.settings
 
+import space.celestia.mobilecelestia.R
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize

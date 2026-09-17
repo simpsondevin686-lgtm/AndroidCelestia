@@ -160,7 +160,7 @@ jobs:
         working-directory: '${{ github.workspace }}/AndroidCelestia'
         run: |
           BUILD_NUMBER=$((6661 + ${{ github.run_number }}))
-          sed -i "s/android:versionCode="[0-9]*"/android:versionCode="${BUILD_NUMBER}"/" app/src/main/AndroidManifest.xml
+          sed -i "s/android:versionCode=\"[0-9]*\"/android:versionCode=\"${BUILD_NUMBER}\"/" app/src/main/AndroidManifest.xml
 
       - name: Set up Java 21
         uses: actions/setup-java@v4

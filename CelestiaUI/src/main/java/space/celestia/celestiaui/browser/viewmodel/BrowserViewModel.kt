@@ -1,7 +1,5 @@
 package space.celestia.celestiaui.browser.viewmodel
 
-import space.celestia.mobilecelestia.R
-
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.toMutableStateList

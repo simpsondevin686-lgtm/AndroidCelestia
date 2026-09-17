@@ -9,8 +9,6 @@
 
 package space.celestia.celestiaui.settings
 
-import space.celestia.mobilecelestia.R
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues

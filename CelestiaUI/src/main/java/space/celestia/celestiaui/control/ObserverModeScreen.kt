@@ -1,7 +1,5 @@
 package space.celestia.celestiaui.control
 
-import space.celestia.mobilecelestia.R
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer

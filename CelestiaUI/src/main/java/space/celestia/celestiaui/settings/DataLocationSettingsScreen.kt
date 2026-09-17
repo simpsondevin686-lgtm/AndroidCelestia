@@ -9,8 +9,6 @@
 
 package space.celestia.celestiaui.settings
 
-import space.celestia.mobilecelestia.R
-
 import android.content.Intent
 import android.provider.DocumentsContract
 import androidx.activity.compose.LocalActivity

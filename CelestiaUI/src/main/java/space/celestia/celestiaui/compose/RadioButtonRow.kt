@@ -1,5 +1,7 @@
 package space.celestia.celestiaui.compose
 
+import space.celestia.mobilecelestia.R
+
 import android.graphics.Typeface
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

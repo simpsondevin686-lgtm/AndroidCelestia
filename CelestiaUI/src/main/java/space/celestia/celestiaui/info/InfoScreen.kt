@@ -9,6 +9,8 @@
 
 package space.celestia.celestiaui.info
 
+import space.celestia.mobilecelestia.R
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues

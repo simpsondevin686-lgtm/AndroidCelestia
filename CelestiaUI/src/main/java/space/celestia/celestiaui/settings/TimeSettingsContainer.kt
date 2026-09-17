@@ -9,6 +9,8 @@
 
 package space.celestia.celestiaui.settings
 
+import space.celestia.mobilecelestia.R
+
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith

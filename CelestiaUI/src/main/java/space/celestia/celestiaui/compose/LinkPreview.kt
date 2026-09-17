@@ -1,5 +1,7 @@
 package space.celestia.celestiaui.compose
 
+import space.celestia.mobilecelestia.R
+
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.clickable

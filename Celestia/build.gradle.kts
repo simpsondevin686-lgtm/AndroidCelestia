@@ -62,7 +62,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    namespace = "space.celestia.celestia"
+    namespace = "space.celestia.mobile"
 
     flavorDimensions += "renderer"
     productFlavors {

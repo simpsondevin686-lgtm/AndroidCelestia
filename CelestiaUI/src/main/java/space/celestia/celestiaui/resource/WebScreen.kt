@@ -1,5 +1,7 @@
 package space.celestia.celestiaui.resource
 
+import space.celestia.mobilecelestia.R
+
 import android.net.Uri
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally

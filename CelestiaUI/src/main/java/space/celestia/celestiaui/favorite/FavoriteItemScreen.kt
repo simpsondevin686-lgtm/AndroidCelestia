@@ -9,8 +9,6 @@
 
 package space.celestia.celestiaui.favorite
 
-import space.celestia.mobilecelestia.R
-
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

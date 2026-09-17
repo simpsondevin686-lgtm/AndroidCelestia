@@ -1,7 +1,5 @@
 package space.celestia.celestiaui.compose
 
-import space.celestia.mobilecelestia.R
-
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

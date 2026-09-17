@@ -1,5 +1,7 @@
 package space.celestia.celestiaui.settings
 
+import space.celestia.mobilecelestia.R
+
 import android.graphics.Typeface
 import android.graphics.fonts.SystemFonts
 import android.os.Build

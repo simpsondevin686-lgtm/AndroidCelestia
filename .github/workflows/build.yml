@@ -64,8 +64,12 @@ jobs:
           path: CelestiaContent
           fetch-depth: 0
 
-      - name: Checkout CelestiaLocalization
         uses: actions/checkout@v4
+        with:
+          repository: CelestiaProject/CelestiaLocalization
+          path: CelestiaLocalization
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
         with:
           repository: CelestiaProject/CelestiaLocalization
           path: CelestiaLocalization

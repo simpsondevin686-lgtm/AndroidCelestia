@@ -65,11 +65,9 @@ jobs:
           fetch-depth: 0
 
       - name: Checkout CelestiaLocalization
-        uses: actions/checkout@v4
-        with:
-          repository: CelestiaProject/CelestiaLocalization
-          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
-          path: CelestiaLocalization
+        run: |
+          rm -rf CelestiaLocalization
+          git clone --depth 1 https://github.com/CelestiaProject/CelestiaLocalization.git CelestiaLocalization
       - name: Install Dependencies
         run: sudo apt update && sudo apt install -y gettext gperf imagemagick wget
 

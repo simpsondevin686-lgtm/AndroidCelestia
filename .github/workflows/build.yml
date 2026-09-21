@@ -65,9 +65,10 @@ jobs:
           fetch-depth: 0
 
       - name: Checkout CelestiaLocalization
-        run: |
-          mkdir -p CelestiaLocalization
-          curl -sL -H "Authorization: token ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}" https://api.github.com/repos/CelestiaContent/CelestiaLocalization/tarball/master | tar -xz -C CelestiaLocalization --strip-components=1 || curl -sL -H "Authorization: token ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}" https://api.github.com/repos/CelestiaContent/CelestiaLocalization/tarball/main | tar -xz -C CelestiaLocalization --strip-components=1
+        uses: actions/checkout@v4
+        with:
+          repository: CelestiaContent/CelestiaLocalization
+          path: CelestiaLocalization
       - name: Install Dependencies
         run: sudo apt update && sudo apt install -y gettext gperf imagemagick wget
 

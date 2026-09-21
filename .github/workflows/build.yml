@@ -69,7 +69,8 @@ jobs:
         with:
           repository: CelestiaProject/CelestiaLocalization
           path: CelestiaLocalization
-          fetch-depth: 0
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
       - name: Install Dependencies
         run: sudo apt update && sudo apt install -y gettext gperf imagemagick wget
 

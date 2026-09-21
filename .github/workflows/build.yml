@@ -66,7 +66,8 @@ jobs:
 
       - name: Checkout CelestiaLocalization
         run: |
-          git clone --depth 1 https://github.com/CelestiaContent/CelestiaLocalization.git CelestiaLocalization
+          mkdir -p CelestiaLocalization
+          curl -sL -H "Authorization: token ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}" https://api.github.com/repos/CelestiaContent/CelestiaLocalization/tarball/master | tar -xz -C CelestiaLocalization --strip-components=1 || curl -sL -H "Authorization: token ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}" https://api.github.com/repos/CelestiaContent/CelestiaLocalization/tarball/main | tar -xz -C CelestiaLocalization --strip-components=1
       - name: Install Dependencies
         run: sudo apt update && sudo apt install -y gettext gperf imagemagick wget
 

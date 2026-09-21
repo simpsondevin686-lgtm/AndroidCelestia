@@ -206,43 +206,6 @@ jobs:
           path: '${{ runner.temp }}/artifacts'
           retention-days: 90
 
-      - name: Upload Symbols
-        working-directory: '${{ github.workspace }}/AndroidCelestia'
-        env:
-          SENTRY_ORG: celestia-vs
-          SENTRY_PROJECT: android
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          shopt -s globstar
-          mkdir bundle
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $BUNDLE_UUID app/src/main/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $FLAVOR_BUNDLE_UUID app/src/$FLAVOR/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $CELESTIA_BUNDLE_UUID Celestia/src/main/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $CELESTIA_FLAVOR_BUNDLE_UUID Celestia/src/mobile/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $CELESTIA_FOUNDATION_BUNDLE_UUID CelestiaFoundation/src/main/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $CELESTIA_UI_BUNDLE_UUID CelestiaUI/src/main/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $CELESTIA_UI_FLAVOR_BUNDLE_UUID CelestiaUI/src/mobile/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $LINK_PREVIEW_BUNDLE_UUID LinkPreview/src/main/java
-          sentry-cli debug-files bundle-jvm --output bundle --debug-id $ZIP_UTILS_BUNDLE_UUID ZipUtils/src/main/java
-          sentry-cli debug-files upload --type jvm bundle
-          sentry-cli upload-proguard --uuid $PROGUARD_UUID app/build/outputs/mapping/$FLAVOR_TASK/mapping.txt
-          sentry-cli debug-files upload --include-sources Celestia/build/intermediates/cxx/RelWithDebInfo/
-          sentry-cli debug-files upload --include-sources ZipUtils/build/intermediates/cxx/RelWithDebInfo/
-
-          mkdir symbols
-          cp -r Celestia/build/intermediates/cxx/RelWithDebInfo/**/obj/* symbols
-          cp -r ZipUtils/build/intermediates/cxx/RelWithDebInfo/**/obj/* symbols
-
-          mkdir mapping
-          cp app/build/outputs/mapping/$FLAVOR_TASK/mapping.txt mapping
-
-      - name: Upload Symbols Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: '${{ matrix.outputFormat }}-symbols'
-          path: '${{ github.workspace }}/AndroidCelestia/symbols'
-          retention-days: 90
-
       - name: Upload Mapping Artifacts
         uses: actions/upload-artifact@v4
         with:

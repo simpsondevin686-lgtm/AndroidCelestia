@@ -285,7 +285,7 @@ enum class SettingsKey : PreferenceManager.Key {
             ShowMarkers -> CelestiaString("Show Markers", "")
             ShowEcliptic -> CelestiaString("Ecliptic Line", "")
             ShowAutoMag -> CelestiaString("Auto Mag", "Auto mag for star display")
-            PhysicalLighting -> CelestiaString("Physical Lighting", "Physical lighting setting name"),
+            PhysicalLighting -> CelestiaString("Physical Lighting", "Physical lighting setting name")
             ShowSmoothLines -> CelestiaString("Smooth Lines", "Smooth lines for rendering")
             ToneMapping -> CelestiaString("Tone Mapping", "")
             EnableReverseWheel -> CelestiaString("Reverse Mouse Wheel", "")
@@ -321,6 +321,7 @@ enum class SettingsKey : PreferenceManager.Key {
         val allBooleanCases: List<SettingsKey>
             get() = listOf(
                 // Boolean values
+                PhysicalLighting,
                 ShowStars,
                 ShowPlanets,
                 ShowDwarfPlanets,

@@ -1229,18 +1229,6 @@ Java_space_celestia_celestia_AppCore_c_1setStarMaxIrradiance(JNIEnv *env, jclass
     core->getRenderer()->setStarMaxIrradiance(value);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_space_celestia_celestia_AppCore_c_1setPhysicalLighting(JNIEnv *env, jclass clazz, jlong pointer, jboolean value) {
-    auto core = reinterpret_cast<CelestiaCore *>(pointer);
-    core->getRenderer()->setPhysicalLighting(value == JNI_TRUE);
-}
-
-extern "C" JNIEXPORT jboolean JNICALL
-Java_space_celestia_celestia_AppCore_c_1getPhysicalLighting(JNIEnv *env, jclass clazz, jlong pointer) {
-    auto core = reinterpret_cast<CelestiaCore *>(pointer);
-    return core->getRenderer()->getPhysicalLighting() ? JNI_TRUE : JNI_FALSE;
-}
-
 extern "C" JNIEXPORT jfloat JNICALL
 Java_space_celestia_celestia_AppCore_c_1getStarMaxIrradiance(JNIEnv *env, jclass clazz, jlong pointer) {
     auto core = reinterpret_cast<CelestiaCore *>(pointer);

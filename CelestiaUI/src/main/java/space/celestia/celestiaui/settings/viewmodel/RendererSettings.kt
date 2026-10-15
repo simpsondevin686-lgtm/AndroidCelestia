@@ -46,6 +46,7 @@ val commonRendererItems: List<SettingsItem> = listOf(
             SettingsCommonItem.Section(
                 listOf(
                     SettingsSwitchItem(SettingsKey.ShowAutoMag, SettingsSwitchItem.Representation.Switch),
+                    SettingsSwitchItem(SettingsKey.PhysicalLighting, SettingsSwitchItem.Representation.Switch),
                     SettingsSliderItem(SettingsKey.FaintestVisible, 3.0, 12.0),
                 )
             ),

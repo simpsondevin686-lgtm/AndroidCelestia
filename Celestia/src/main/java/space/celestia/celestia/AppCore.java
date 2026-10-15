@@ -938,11 +938,6 @@ public class AppCore {
     private static native void c_setStarMaxIrradiance(long pointer, float starMaxIrradiance);
     private static native float c_getStarMaxIrradiance(long pointer);
 
-    public void setPhysicalLighting(boolean physicalLighting) { c_setPhysicalLighting(pointer, physicalLighting); }
-    public boolean getPhysicalLighting() { return c_getPhysicalLighting(pointer); }
-    private static native void c_setPhysicalLighting(long pointer, boolean physicalLighting);
-    private static native boolean c_getPhysicalLighting(long pointer);
-
     public void setStarExposure(double starExposure) { c_setStarExposure(pointer, (float)starExposure); }
     public double getStarExposure() { return c_getStarExposure(pointer); }
     private static native void c_setStarExposure(long pointer, float starExposure);

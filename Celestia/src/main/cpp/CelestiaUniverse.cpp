@@ -297,7 +297,7 @@ Java_space_celestia_celestia_Universe_c_1mark(JNIEnv *env, jclass clazz,
                                                          jlong ptr, jobject selection,
                                                          jint marker) {
     auto u = reinterpret_cast<Universe *>(ptr);
-    u->markObject(javaSelectionAsSelection(env, selection), celestia::MarkerRepresentation(celestia::MarkerRepresentation::Symbol(marker), 10.0f, Color(0.0f, 1.0f, 0.0f, 0.9f)), 1);
+    u->markObject(javaSelectionAsSelection(env, selection), celestia::engine::MarkerRepresentation(static_cast<celestia::engine::MarkerSymbol>(marker), 10.0f, Color(0.0f, 1.0f, 0.0f, 0.9f)), 1);
 }
 
 extern "C"

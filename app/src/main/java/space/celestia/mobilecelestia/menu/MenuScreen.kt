@@ -36,12 +36,11 @@ import space.celestia.mobilecelestia.R
 import java.io.Serializable
 
 enum class ToolbarAction : Serializable {
-    Setting, Share, Search, Time, Script, Camera, Browse, Help, Favorite, Home, Event, Exit, Addons, Download, Paperplane, Speedometer, NewsArchive, Feedback, CelestiaPlus, CenterTransit;
+    Setting, Share, Search, Time, Script, Camera, Browse, Help, Favorite, Home, Event, Exit, Addons, Download, Paperplane, Speedometer, NewsArchive, Feedback, CelestiaPlus;
 
     val title: String
         get() {
             return when (this) {
-                CenterTransit -> CelestiaString("Center Transit", "")
                 Time -> CelestiaString("Time Control", "")
                 Script -> CelestiaString("Script Control", "")
                 Camera -> CelestiaString("Camera Control", "Observer control")
@@ -67,7 +66,6 @@ enum class ToolbarAction : Serializable {
     val imageResource: Int
         get() {
             return when(this) {
-                CenterTransit -> R.drawable.toolbar_browse
                 Setting -> R.drawable.toolbar_setting
                 Share -> R.drawable.toolbar_share
                 Search -> R.drawable.toolbar_search
@@ -94,7 +92,7 @@ enum class ToolbarAction : Serializable {
         val persistentAction: List<List<ToolbarAction>>
             get() = listOf(
                 listOf(Setting),
-                listOf(Share, Search, Home, Paperplane, CenterTransit),
+                listOf(Share, Search, Home, Paperplane),
                 listOf(Camera, Time, Script, Speedometer),
                 listOf(Browse, Favorite, Event),
                 listOf(Addons, Download, NewsArchive),

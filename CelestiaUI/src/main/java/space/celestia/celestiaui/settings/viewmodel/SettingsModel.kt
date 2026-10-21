@@ -27,6 +27,7 @@ enum class SettingsKey : PreferenceManager.Key {
     ShowGlobulars,
     ShowOpenClusters,
     ShowAtmospheres,
+    SimulateGravity,
     ShowCloudMaps,
     ShowCloudShadows,
     ShowNightMaps,
@@ -179,6 +180,7 @@ enum class SettingsKey : PreferenceManager.Key {
             ShowGlobulars -> CelestiaString("Globulars", "")
             ShowOpenClusters -> CelestiaString("Open Clusters", "")
             ShowAtmospheres -> CelestiaString("Atmospheres", "")
+            SimulateGravity -> CelestiaString("Simulate Gravity", "Observer gravity physics")
             ShowCloudMaps -> CelestiaString("Clouds", "")
             ShowCloudShadows -> CelestiaString("Cloud Shadows", "")
             ShowNightMaps -> CelestiaString("Night Lights", "")
@@ -332,6 +334,7 @@ enum class SettingsKey : PreferenceManager.Key {
                 ShowGlobulars,
                 ShowOpenClusters,
                 ShowAtmospheres,
+    SimulateGravity,
                 ShowCloudMaps,
                 ShowCloudShadows,
                 ShowNightMaps,

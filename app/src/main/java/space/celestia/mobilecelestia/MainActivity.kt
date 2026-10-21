@@ -1172,7 +1172,7 @@ class MainActivity : AppCompatActivity(),
         if (sel.isEmpty) return
         
         val universe = sim.universe
-        val childrenStr = if (sel.type == SelectionType.Star) universe.getChildrenForStar(sel) else universe.getChildrenForBody(sel)
+        val childrenStr = if (sel.star != null) universe.getChildrenForStar(sel) else universe.getChildrenForBody(sel)
         
         if (childrenStr.isNullOrEmpty()) {
             android.widget.Toast.makeText(this, "No orbiting bodies found", android.widget.Toast.LENGTH_SHORT).show()

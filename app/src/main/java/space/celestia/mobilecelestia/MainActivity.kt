@@ -1167,8 +1167,8 @@ class MainActivity : AppCompatActivity(),
 
     
     private fun showCenterTransit() {
-        val sim = getSimulation()
-        val sel = sim?.selection ?: return
+        val sim = appCore.simulation ?: return
+        val sel = sim.selection ?: return
         if (sel.isEmpty) return
         
         val universe = sim.universe
@@ -1201,9 +1201,7 @@ class MainActivity : AppCompatActivity(),
                 .setTitle("Center Transit")
                 .setItems(childNames.toTypedArray()) { _, which ->
                     val targetSel = childSelections[which]
-                    if (sim.pointer != 0L && targetSel.pointer != 0L) {
-                        sim.c_centerTransit(sim.pointer, targetSel.pointer)
-                    }
+                    sim.c_centerTransit(sim.pointer, targetSel.pointer)
                 }
                 .show()
         }

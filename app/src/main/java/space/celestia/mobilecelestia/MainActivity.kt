@@ -1186,8 +1186,9 @@ class MainActivity : AppCompatActivity(),
         for (i in 0 until jsonArray.length()) {
             val name = jsonArray.optString(i)
             if (!name.isNullOrEmpty()) {
-                val childSel = universe.findObject(name, sel)
-                if (childSel != null) {
+                // findObject is on Simulation, not Universe
+                val childSel = sim.findObject(name)
+                if (childSel != null && !childSel.isEmpty) {
                     childNames.add(name)
                     childSelections.add(childSel)
                 }
@@ -1201,7 +1202,8 @@ class MainActivity : AppCompatActivity(),
                 .setTitle("Center Transit")
                 .setItems(childNames.toTypedArray()) { _, which ->
                     val targetSel = childSelections[which]
-                    sim.c_centerTransit(sim.pointer, targetSel.pointer)
+                    // Call the safe Java wrapper
+                    sim.centerTransit(targetSel)
                 }
                 .show()
         }

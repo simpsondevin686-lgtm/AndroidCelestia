@@ -1166,54 +1166,8 @@ class MainActivity : AppCompatActivity(),
     }
 
     
-    private fun showCenterTransit() {
-        val sim = appCore.simulation ?: return
-        val sel = sim.selection ?: return
-        if (sel.isEmpty) return
-        
-        val universe = sim.universe
-        val childrenStr = if (sel.star != null) universe.getChildrenForStar(sel) else universe.getChildrenForBody(sel)
-        
-        if (childrenStr.isNullOrEmpty()) {
-            android.widget.Toast.makeText(this, "No orbiting bodies found", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val jsonArray = org.json.JSONArray(childrenStr)
-        val childNames = ArrayList<String>()
-        val childSelections = ArrayList<Selection>()
-        
-        for (i in 0 until jsonArray.length()) {
-            val name = jsonArray.optString(i)
-            if (!name.isNullOrEmpty()) {
-                // findObject is on Simulation, not Universe
-                val childSel = sim.findObject(name)
-                if (childSel != null && !childSel.isEmpty) {
-                    childNames.add(name)
-                    childSelections.add(childSel)
-                }
-            }
-        }
-
-        if (childNames.isEmpty()) return
-
-        runOnUiThread {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Center Transit")
-                .setItems(childNames.toTypedArray()) { _, which ->
-                    val targetSel = childSelections[which]
-                    // Call the safe Java wrapper
-                    sim.centerTransit(targetSel)
-                }
-                .show()
-        }
-    }
-
     private fun executeToolbarAction(action: ToolbarAction) {
         when (action) {
-            ToolbarAction.CenterTransit -> {
-                showCenterTransit()
-            }
             ToolbarAction.Search -> {
                 showSearch()
             }

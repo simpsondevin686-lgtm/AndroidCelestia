@@ -182,11 +182,3 @@ Java_space_celestia_celestia_Simulation_c_1getActiveObserver(JNIEnv *env, jclass
     auto sim = reinterpret_cast<Simulation *>(pointer);
     return (jlong)sim->getActiveObserver();
 }
-JNIEXPORT void JNICALL
-Java_space_celestia_celestia_Simulation_c_1centerTransit(JNIEnv *env, jobject thiz, jlong ptr, jlong selectionPtr)
-{
-    auto sim = reinterpret_cast<Simulation*>(ptr);
-    auto sel = reinterpret_cast<Selection*>(selectionPtr);
-    if (sim && sel)
-        sim->centerTransit(*sel);
-}

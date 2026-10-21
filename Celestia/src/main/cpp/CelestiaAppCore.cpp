@@ -1572,3 +1572,16 @@ Java_space_celestia_celestia_AppCore_c_1getTextEnterMode(JNIEnv *env, jclass cla
     auto core = reinterpret_cast<CelestiaCore *>(ptr);
     return static_cast<jint>(core->getTextEnterMode());
 }
+JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1setSimulateGravity(JNIEnv *env, jobject thiz, jlong ptr, jboolean value)
+{
+    auto appCore = reinterpret_cast<CelestiaCore*>(ptr);
+    if (appCore) appCore->getSimulation()->setSimulateGravity(value);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_space_celestia_celestia_AppCore_c_1getSimulateGravity(JNIEnv *env, jobject thiz, jlong ptr)
+{
+    auto appCore = reinterpret_cast<CelestiaCore*>(ptr);
+    return appCore ? appCore->getSimulation()->getSimulateGravity() : JNI_FALSE;
+}

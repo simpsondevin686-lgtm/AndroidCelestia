@@ -99,4 +99,6 @@ public class Simulation {
     private static native void c_goToDestination(long ptr, String target, double distance);
     private static native void c_goToLocation(long pointer, Selection selection, double distance, double duration);
     private static native void c_goToLocationLongLat(long pointer, Selection selection, float longitude, float latitude, double distance, double duration);
+
+    public native void c_centerTransit(long ptr, long selectionPtr);
 }

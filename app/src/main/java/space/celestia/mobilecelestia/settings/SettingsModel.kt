@@ -56,6 +56,7 @@ private val staticDisplayItems: List<SettingsItem> = listOf(
     )),
     SettingsCommonItem.create(CelestiaString("Features", ""), listOf(
         SettingsSwitchItem(SettingsKey.ShowAtmospheres),
+        SettingsSwitchItem(SettingsKey.SimulateGravity),
         SettingsSwitchItem(SettingsKey.ShowCloudMaps),
         SettingsSwitchItem(SettingsKey.ShowCloudShadows),
         SettingsSwitchItem(SettingsKey.ShowNightMaps),

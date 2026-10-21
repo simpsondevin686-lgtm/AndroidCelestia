@@ -184,6 +184,9 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
             SwitchRow(primaryText = item.name, secondaryText = item.subtitle, checked = on, onCheckedChange = { newValue ->
                 on = newValue
                 viewModel.appSettings[item.key] = if (newValue) "true" else "false"
+                            if (item.key == SettingsKey.SimulateGravity) {
+                                viewModel.appCore.setSimulateGravity(newValue)
+                            }
                 viewModel.refreshSettingVisibility()
             })
         }

@@ -484,11 +484,6 @@ public class AppCore {
     public void setShowNightMaps(boolean showNightMaps) { c_setShowNightMaps(pointer, showNightMaps); }
     private static native void c_setShowNightMaps(long pointer, boolean showNightMaps);
     private native boolean c_getShowNightMaps(long pointer);
-    public boolean getSimulateGravity() { return c_getSimulateGravity(pointer); }
-    public void setSimulateGravity(boolean value) { c_setSimulateGravity(pointer, value); }
-    private static native void c_setSimulateGravity(long pointer, boolean value);
-    private native boolean c_getSimulateGravity(long pointer);
-
     public boolean getShowAtmospheres() { return c_getShowAtmospheres(pointer); }
     public void setShowAtmospheres(boolean showAtmospheres) { c_setShowAtmospheres(pointer, showAtmospheres); }
     private static native void c_setShowAtmospheres(long pointer, boolean showAtmospheres);

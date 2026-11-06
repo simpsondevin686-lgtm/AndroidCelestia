@@ -57,7 +57,7 @@ val commonRendererItems: List<SettingsItem> = listOf(
         )),
         SettingsCommonItem.Section(listOf(
             SettingsSliderItem(SettingsKey.AmbientLightLevel, 0.0, 1.0),
-            SettingsSliderItem(SettingsKey.GalaxyBrightness, 0.0, 1.0),
+            SettingsSliderItem(SettingsKey.GalaxyBrightness, 0.0, 99.99),
         )),
     )),
 )

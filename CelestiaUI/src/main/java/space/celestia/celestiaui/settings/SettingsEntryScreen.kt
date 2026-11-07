@@ -74,7 +74,6 @@ import java.text.NumberFormat
 @Composable
 fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, linkClicked: (String, Boolean) -> Unit) {
     var showSimDialog by remember { mutableStateOf(false) }
-    var showSimDialog by remember { mutableStateOf(false) }
     val viewModel: SettingsViewModel = hiltViewModel()
     LazyColumn(modifier = Modifier
         .nestedScroll(rememberNestedScrollInteropConnection()), contentPadding = paddingValues) {
@@ -123,6 +122,35 @@ fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, 
                 }
             }
         }
+    }
+
+    if (showSimDialog) {
+        var magStr by remember { mutableStateOf("10") }
+        var diaStr by remember { mutableStateOf("50") }
+        AlertDialog(
+            onDismissRequest = { showSimDialog = false },
+            title = { Text("Simulate Optics") },
+            text = {
+                Column {
+                    OutlinedTextField(value = magStr, onValueChange = { magStr = it }, label = { Text("Magnification") })
+                    OutlinedTextField(value = diaStr, onValueChange = { diaStr = it }, label = { Text("Diameter (mm)") })
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val mag = magStr.toFloatOrNull() ?: 1f
+                    val dia = diaStr.toFloatOrNull() ?: 7f
+                    viewModel.appCore.simulateOptics(mag, dia)
+                    showSimDialog = false
+                }) { Text("Start") }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    viewModel.appCore.stopSimulatingOptics()
+                    showSimDialog = false 
+                }) { Text("Stop Simulating") }
+            }
+        )
     }
 }
 

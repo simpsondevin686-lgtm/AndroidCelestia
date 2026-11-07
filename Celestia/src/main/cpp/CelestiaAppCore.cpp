@@ -1393,8 +1393,6 @@ Java_space_celestia_celestia_AppCore_c_1isSimulatingOptics(JNIEnv *env, jclass c
     return core->isSimulatingOptics();
 }
 
-
-
 extern "C"
 JNIEXPORT void JNICALL
 Java_space_celestia_celestia_AppCore_c_1setGalaxyBrightness(JNIEnv *env, jclass clazz, jlong pointer, jdouble galaxy_brightness) {

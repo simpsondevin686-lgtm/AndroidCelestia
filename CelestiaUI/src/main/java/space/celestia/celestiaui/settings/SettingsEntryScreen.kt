@@ -44,6 +44,13 @@ import space.celestia.celestiaui.compose.Separator
 import space.celestia.celestiaui.compose.SliderRow
 import space.celestia.celestiaui.compose.SwitchRow
 import space.celestia.celestiaui.compose.TextRow
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import space.celestia.celestiaui.settings.viewmodel.Footer
 import space.celestia.celestiaui.settings.viewmodel.SettingsActionItem
 import space.celestia.celestiaui.settings.viewmodel.SettingsCommonItem
@@ -216,11 +223,43 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
         }
 
         is SettingsActionItem -> {
+            if (item.action == 9999) {
+                var showDialog by remember { mutableStateOf(false) }
+                var magStr by remember { mutableStateOf("10") }
+                var diaStr by remember { mutableStateOf("50") }
+                
+                TextRow(primaryText = item.name, modifier = Modifier.clickable { showDialog = true })
+                
+                if (showDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = { Text("Simulate Optics") },
+                        text = {
+                            Column {
+                                OutlinedTextField(value = magStr, onValueChange = { magStr = it }, label = { Text("Magnification (e.g. 10)") })
+                                OutlinedTextField(value = diaStr, onValueChange = { diaStr = it }, label = { Text("Diameter mm (e.g. 50)") })
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                val mag = magStr.toFloatOrNull() ?: 1f
+                                val dia = diaStr.toFloatOrNull() ?: 7f
+                                viewModel.appCore.simulateOptics(mag, dia)
+                                showDialog = false
+                            }) { Text("Start") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                        }
+                    )
+                }
+            } else {
             TextRow(primaryText = item.name, modifier = Modifier.clickable(onClick = dropUnlessResumed {
                 scope.launch(viewModel.executor.asCoroutineDispatcher()) {
                     viewModel.appCore.charEnter(item.action)
                 }
             }))
+            }
         }
 
         is SettingsUnknownTextItem -> {

@@ -152,6 +152,35 @@ fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, 
             }
         )
     }
+
+    if (showSimDialog) {
+        var magStr by remember { mutableStateOf("10") }
+        var diaStr by remember { mutableStateOf("50") }
+        AlertDialog(
+            onDismissRequest = { showSimDialog = false },
+            title = { Text("Simulate Optics") },
+            text = {
+                Column {
+                    OutlinedTextField(value = magStr, onValueChange = { magStr = it }, label = { Text("Magnification") })
+                    OutlinedTextField(value = diaStr, onValueChange = { diaStr = it }, label = { Text("Diameter (mm)") })
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val mag = magStr.toFloatOrNull() ?: 1f
+                    val dia = diaStr.toFloatOrNull() ?: 7f
+                    viewModel.appCore.simulateOptics(mag, dia)
+                    showSimDialog = false
+                }) { Text("Start") }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    viewModel.appCore.stopSimulatingOptics()
+                    showSimDialog = false 
+                }) { Text("Stop Simulating") }
+            }
+        )
+    }
 }
 
 @Composable
@@ -256,49 +285,11 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
             if (item.action == 9999) {
                 TextRow(primaryText = item.name, modifier = Modifier.clickable { showSimDialog = true })
             } else {
-            if (item.action == 9998) {
-                TextRow(primaryText = item.name, modifier = Modifier.clickable {
-                    viewModel.appCore.stopSimulatingOptics()
-                })
-            } else
-            if (false) {
-                var showDialog by remember { mutableStateOf(false) }
-                var magStr by remember { mutableStateOf("10") }
-                var diaStr by remember { mutableStateOf("50") }
-                
-                TextRow(primaryText = item.name, modifier = Modifier.clickable { showDialog = true })
-                
-                if (showDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDialog = false },
-                        title = { Text("Simulate Optics") },
-                        text = {
-                            Column {
-                                OutlinedTextField(value = magStr, onValueChange = { magStr = it }, label = { Text("Magnification (e.g. 10)") })
-                                OutlinedTextField(value = diaStr, onValueChange = { diaStr = it }, label = { Text("Diameter mm (e.g. 50)") })
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                val mag = magStr.toFloatOrNull() ?: 1f
-                                val dia = diaStr.toFloatOrNull() ?: 7f
-                                viewModel.appCore.simulateOptics(mag, dia)
-                                showDialog = false
-                            }) { Text("Start") }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDialog = false }) { Text("Cancel") }
-                        }
-                    )
-                }
-            } else {
-            TextRow(primaryText = item.name, modifier = Modifier.clickable(onClick = dropUnlessResumed {
-                scope.launch(viewModel.executor.asCoroutineDispatcher()) {
-                    viewModel.appCore.charEnter(item.action)
-                }
-            }))
-            }
-            }
+                TextRow(primaryText = item.name, modifier = Modifier.clickable(onClick = dropUnlessResumed {
+                    scope.launch(viewModel.executor.asCoroutineDispatcher()) {
+                        viewModel.appCore.charEnter(item.action)
+                    }
+                }))
             }
         }
 
@@ -357,129 +348,5 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
                     slider.toDouble()
                 }
             }
-            val valueRange = if (isLog) 0f..1f else item.minValue.toFloat()..item.maxValue.toFloat()
-            val valueFormatter = remember {
-                NumberFormat.getNumberInstance().apply {
-                    maximumFractionDigits = 2
-                }
-            }
-            var value by remember {
-                mutableFloatStateOf(actualToSlider(viewModel.appCore.getDoubleValueForField(item.key)))
-            }
-            SliderRow(
-                primaryText = item.name,
-                secondaryText = item.subtitle,
-                value = value,
-                valueRange = valueRange,
-                valueText = valueFormatter.format(sliderToActual(value)),
-                onValueChange = { newValue ->
-                    value = newValue
-                    val actual = sliderToActual(newValue)
-                    viewModel.coreSettings[PreferenceManager.CustomKey(item.key)] = actual.toString()
-                    scope.launch(viewModel.executor.asCoroutineDispatcher()) {
-                        viewModel.appCore.setDoubleValueForField(item.key, actual)
-                    }
-                }
-            )
-        }
-
-        is SettingsPreferenceIntegerSliderItem -> {
-            val storedValue = viewModel.appSettings[item.key]?.toIntOrNull() ?: item.defaultSelection
-            val defaultIndex = item.values.indexOf(item.defaultSelection).coerceAtLeast(0)
-            val valueFormatter = remember {
-                NumberFormat.getIntegerInstance()
-            }
-            var selectedIndex by remember {
-                mutableIntStateOf(item.values.indexOf(storedValue).takeIf { it >= 0 } ?: defaultIndex)
-            }
-            SliderRow(
-                primaryText = item.name,
-                secondaryText = item.subtitle,
-                value = selectedIndex.toFloat(),
-                valueRange = 0f..item.values.lastIndex.toFloat(),
-                steps = item.values.size - 2,
-                valueText = valueFormatter.format(item.values[selectedIndex]),
-                onValueChange = { newValue ->
-                    selectedIndex = kotlin.math.round(newValue).toInt().coerceIn(item.values.indices)
-                    viewModel.appSettings[item.key] = item.values[selectedIndex].toString()
-                }
-            )
-        }
-
-        is SettingsPreferenceSliderItem -> {
-            val valueFormatter = remember {
-                NumberFormat.getNumberInstance().apply {
-                    maximumFractionDigits = 2
-                }
-            }
-            var value by remember {
-                mutableFloatStateOf(viewModel.appSettings[item.key]?.toFloat() ?: item.defaultValue.toFloat())
-            }
-            SliderRow(
-                primaryText = item.name,
-                secondaryText = item.subtitle,
-                value = value,
-                valueRange = item.minValue.toFloat()..item.maxValue.toFloat(),
-                valueText = valueFormatter.format(value.toDouble()),
-                onValueChange = { newValue ->
-                    value = newValue
-                    viewModel.appSettings[item.key] = newValue.toString()
-                }
-            )
-        }
-    }
+            val valueRange = 
 }
-}    
-)        
-}            
-} )"lecnaC"(txeT { )} eslaf = golaiDmiSwohs { = kcilCno(nottuBtxeT                
-{ = nottuBssimsid            
-,}            
-} )"tratS"(txeT { )}                
-eslaf = golaiDmiSwohs                    
-)aid ,gam(scitpOetalumis.eroCppa.ledoMweiv                    
-f7 :? )(lluNrOtaolFot.rtSaid = aid lav                    
-f1 :? )(lluNrOtaolFot.rtSgam = gam lav                    
-{ = kcilCno(nottuBtxeT                
-{ = nottuBmrifnoc            
-,}            
-}                
-)} )")mm( retemaiD"(txeT { = lebal ,} ti = rtSaid { = egnahCeulaVno ,rtSaid = eulav(dleiFtxeTdeniltuO                    
-)} )"noitacifingaM"(txeT { = lebal ,} ti = rtSgam { = egnahCeulaVno ,rtSgam = eulav(dleiFtxeTdeniltuO                    
-{ nmuloC                
-{ = txet            
-,} )"scitpO etalumiS"(txeT { = eltit            
-,} eslaf = golaiDmiSwohs { = tseuqeRssimsiDno            
-(golaiDtrelA        
-} )"05"(fOetatSelbatum { rebmemer yb rtSaid rav        
-}
-}    
-)        
-}            
-} )"gnitalumiS potS"(txeT { )}                
- eslaf = golaiDmiSwohs                    
-)(scitpOgnitalumiSpots.eroCppa.ledoMweiv                    
- { = kcilCno(nottuBtxeT                
-{ = nottuBssimsid            
-,}            
-} )"tratS"(txeT { )}                
-eslaf = golaiDmiSwohs                    
-)aid ,gam(scitpOetalumis.eroCppa.ledoMweiv                    
-f7 :? )(lluNrOtaolFot.rtSaid = aid lav                    
-f1 :? )(lluNrOtaolFot.rtSgam = gam lav                    
-{ = kcilCno(nottuBtxeT                
-{ = nottuBmrifnoc            
-,}            
-}                
-)} )")mm( retemaiD"(txeT { = lebal ,} ti = rtSaid { = egnahCeulaVno ,rtSaid = eulav(dleiFtxeTdeniltuO                    
-)} )"noitacifingaM"(txeT { = lebal ,} ti = rtSgam { = egnahCeulaVno ,rtSgam = eulav(dleiFtxeTdeniltuO                    
-{ nmuloC                
-{ = txet            
-,} )"scitpO etalumiS"(txeT { = eltit            
-,} eslaf = golaiDmiSwohs { = tseuqeRssimsiDno            
-(golaiDtrelA        
-} )"05"(fOetatSelbatum { rebmemer yb rtSaid rav        
-} )"01"(fOetatSelbatum { rebmemer yb rtSgam rav        
-{ )golaiDmiSwohs( fi    
- )"01"(fOetatSelbatum { rebmemer yb rtSgam rav        
-{ )golaiDmiSwohs( fi    

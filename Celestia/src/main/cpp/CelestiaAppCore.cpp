@@ -1414,6 +1414,19 @@ Java_space_celestia_celestia_AppCore_c_1isSimulatingOptics(JNIEnv *env, jclass c
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1simulateOptics(JNIEnv *env, jclass clazz, jlong pointer, jfloat mag, jfloat dia) {
+    auto core = (CelestiaCore*)pointer;
+    core->simulateOptics(mag, dia);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_space_celestia_celestia_AppCore_c_1stopSimulatingOptics(JNIEnv *env, jclass clazz, jlong pointer) {
+    auto core = (CelestiaCore*)pointer;
+    core->stopSimulatingOptics();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_space_celestia_celestia_AppCore_c_1setGalaxyBrightness(JNIEnv *env, jclass clazz, jlong pointer, jdouble galaxy_brightness) {
     Galaxy::setLightGain((float)galaxy_brightness);
 }

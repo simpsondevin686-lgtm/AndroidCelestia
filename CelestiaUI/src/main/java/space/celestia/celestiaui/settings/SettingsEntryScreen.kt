@@ -74,6 +74,7 @@ import java.text.NumberFormat
 @Composable
 fun SettingsEntryScreen(item: SettingsCommonItem, paddingValues: PaddingValues, linkClicked: (String, Boolean) -> Unit) {
     var showSimDialog by remember { mutableStateOf(false) }
+    var showSimDialog by remember { mutableStateOf(false) }
     val viewModel: SettingsViewModel = hiltViewModel()
     LazyColumn(modifier = Modifier
         .nestedScroll(rememberNestedScrollInteropConnection()), contentPadding = paddingValues) {
@@ -224,6 +225,9 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
         }
 
         is SettingsActionItem -> {
+            if (item.action == 9999) {
+                TextRow(primaryText = item.name, modifier = Modifier.clickable { showSimDialog = true })
+            } else {
             if (item.action == 9998) {
                 TextRow(primaryText = item.name, modifier = Modifier.clickable {
                     viewModel.appCore.stopSimulatingOptics()
@@ -265,6 +269,7 @@ private fun SettingEntry(item: SettingsItem, viewModel: SettingsViewModel) {
                     viewModel.appCore.charEnter(item.action)
                 }
             }))
+            }
             }
             }
         }
@@ -419,5 +424,34 @@ f1 :? )(lluNrOtaolFot.rtSgam = gam lav
 ,} eslaf = golaiDmiSwohs { = tseuqeRssimsiDno            
 (golaiDtrelA        
 } )"05"(fOetatSelbatum { rebmemer yb rtSaid rav        
+}
+}    
+)        
+}            
+} )"gnitalumiS potS"(txeT { )}                
+ eslaf = golaiDmiSwohs                    
+)(scitpOgnitalumiSpots.eroCppa.ledoMweiv                    
+ { = kcilCno(nottuBtxeT                
+{ = nottuBssimsid            
+,}            
+} )"tratS"(txeT { )}                
+eslaf = golaiDmiSwohs                    
+)aid ,gam(scitpOetalumis.eroCppa.ledoMweiv                    
+f7 :? )(lluNrOtaolFot.rtSaid = aid lav                    
+f1 :? )(lluNrOtaolFot.rtSgam = gam lav                    
+{ = kcilCno(nottuBtxeT                
+{ = nottuBmrifnoc            
+,}            
+}                
+)} )")mm( retemaiD"(txeT { = lebal ,} ti = rtSaid { = egnahCeulaVno ,rtSaid = eulav(dleiFtxeTdeniltuO                    
+)} )"noitacifingaM"(txeT { = lebal ,} ti = rtSgam { = egnahCeulaVno ,rtSgam = eulav(dleiFtxeTdeniltuO                    
+{ nmuloC                
+{ = txet            
+,} )"scitpO etalumiS"(txeT { = eltit            
+,} eslaf = golaiDmiSwohs { = tseuqeRssimsiDno            
+(golaiDtrelA        
+} )"05"(fOetatSelbatum { rebmemer yb rtSaid rav        
 } )"01"(fOetatSelbatum { rebmemer yb rtSgam rav        
+{ )golaiDmiSwohs( fi    
+ )"01"(fOetatSelbatum { rebmemer yb rtSgam rav        
 { )golaiDmiSwohs( fi    

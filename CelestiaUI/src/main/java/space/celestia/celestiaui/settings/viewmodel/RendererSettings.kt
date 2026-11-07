@@ -59,6 +59,7 @@ val commonRendererItems: List<SettingsItem> = listOf(
             SettingsSliderItem(SettingsKey.AmbientLightLevel, 0.0, 1.0),
             SettingsSliderItem(SettingsKey.GalaxyBrightness, 0.0, 99.99),
             SettingsActionItem(CelestiaString("Simulate Optics", "Rendering settings"), 9999),
+            SettingsActionItem(CelestiaString("Simulate Optics", "Rendering settings"), 9999),
             
         )),
     )),

@@ -1025,6 +1025,11 @@ public class AppCore {
     private static native void c_stopSimulatingOptics(long pointer);
     private static native boolean c_isSimulatingOptics(long pointer);
 
+    public void simulateOptics(float mag, float dia) { c_simulateOptics(pointer, mag, dia); }
+    public void stopSimulatingOptics() { c_stopSimulatingOptics(pointer); }
+    private static native void c_simulateOptics(long pointer, float mag, float dia);
+    private static native void c_stopSimulatingOptics(long pointer);
+
     public void setGalaxyBrightness(double galaxyBrightness) { c_setGalaxyBrightness(pointer, galaxyBrightness); }
     public double getGalaxyBrightness() { return c_getGalaxyBrightness(pointer); }
     private static native void c_setGalaxyBrightness(long pointer, double galaxyBrightness);
